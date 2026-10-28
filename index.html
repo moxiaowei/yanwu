@@ -129,7 +129,7 @@
 <div class="wrap">
   <header>
     <div class="title">⚔️ 演武大会 · 三队方案生成器</div>
-    <div class="subtitle">《三国谋定天下》· 输入本期武将 & 战法卡池 → 生成均衡/双核三队方案 + 出线概率估算</div>
+    <div class="subtitle">《三国谋定天下》· S17 赛季 · 输入本期武将 & 战法卡池 → 生成均衡/双核三队方案 + 出线概率估算</div>
   </header>
 
   <div class="insight">
@@ -149,7 +149,7 @@
     <div class="sh"><span class="bar"></span>武将卡池<span class="cnt" id="gcnt">0 名</span>
       <span class="mini" onclick="toggleBulk('gbulk')">📋 批量粘贴</span></div>
     <div class="bulk" id="gbulk">
-      <textarea id="gbulkTa" placeholder="每行一名武将（逗号/空格分隔）：名字, 阵营(魏/蜀/吴/群), 兵种(步/骑/弓), 定位(输出/坦克/辅助/控制), 强度1-10&#10;例：&#10;周瑜,吴,弓,输出,9&#10;大乔,吴,步,辅助,8&#10;张飞,蜀,步,坦克,8"></textarea>
+      <textarea id="gbulkTa" placeholder="每行一名武将（逗号/空格分隔）：名字, 阵营(魏/蜀/吴/群), 兵种(盾/枪/骑/弓), 定位(输出/坦克/辅助), 强度1-10&#10;例：&#10;皇甫嵩,群,骑,输出,9.5&#10;诸葛亮,蜀,盾,输出,9&#10;孟获,群,盾,辅助,7.5"></textarea>
       <div class="row"><span class="tip">输入名字会自动带出资料库里的阵营/定位（可改）。定位：输出/坦克/辅助/控制。</span><button class="btn blue" onclick="parseGenerals()">导入武将</button></div>
     </div>
     <div class="list" id="glist"></div>
@@ -161,8 +161,8 @@
     <div class="sh" style="margin-top:26px"><span class="bar"></span>战法卡池<span class="cnt" id="tcnt">0 个</span>
       <span class="mini" onclick="toggleBulk('tbulk')">📋 批量粘贴</span></div>
     <div class="bulk" id="tbulk">
-      <textarea id="tbulkTa" placeholder="每行一个战法：名字, 类型(指挥/主动/追击/被动), 特性(兵刃/谋略/治疗/防御/控制/辅助), 品质(橙/紫/蓝), 强度1-10&#10;例：&#10;水淹七军 主动 兵刃 橙 9&#10;揭竿而起 主动 兵刃 橙 7&#10;避其锐气 指挥 防御 紫 6"></textarea>
-      <div class="row"><span class="tip">类型：指挥/主动/追击/被动；特性：兵刃/谋略/治疗/防御/控制/辅助；品质：橙/紫/蓝。输入名字可自动带出。</span><button class="btn blue" onclick="parseTactics()">导入战法</button></div>
+      <textarea id="tbulkTa" placeholder="每行一个战法：名字, 类型(指挥/主动/追击/被动), 特性(兵刃/谋略/文武/防御/治疗/辅助), 品质(橙/紫/蓝), 强度1-10&#10;例：&#10;水淹七军 主动 兵刃 橙 9&#10;揭竿而起 主动 兵刃 紫 7&#10;避其锐气 指挥 防御 紫 6"></textarea>
+      <div class="row"><span class="tip">类型：指挥/主动/追击/被动；特性：兵刃/谋略/文武/防御/治疗/辅助；品质：橙/紫/蓝。输入名字可自动带出。</span><button class="btn blue" onclick="parseTactics()">导入战法</button></div>
     </div>
     <div class="list" id="tlist"></div>
     <div class="addrow"><button class="btn ghost" onclick="addTactic()">➕ 添加战法</button></div>
@@ -212,7 +212,7 @@
   </div>
 
   <div class="foot">数据仅存浏览器(localStorage) · 资料库整理自官方玩家攻略，仅供参考，版本变动以游戏内为准</div>
-  <div class="foot src">资料库来源：17173《三国谋定天下》官方专区玩家投稿（@三谋攻略君 / @三谋攻略详解站）· 演武大会玩法wiki</div>
+  <div class="foot src">资料库来源：sgmdtx.com《三国谋定天下》资料站（武将/战法权威数据，含赛季标注）· 17173 演武大会玩家攻略 · 本页为 S17 赛季整理，仅供参考，以游戏内为准</div>
 </div>
 
 <script>
@@ -221,102 +221,159 @@
    注意：阵营/定位/类型为攻略整理，可自行修改；强度分由你按当期环境判定
    ========================================================= */
 const CAMPS=['魏','蜀','吴','群'];
-const TROOPS=['步','骑','弓'];
+const TROOPS=['盾','枪','骑','弓'];
 const ROLES=['输出','坦克','辅助','控制'];
-const DMG=['兵刃','谋略'];
+const DMG=['兵刃','谋略','文武'];
 const TTYPES=['指挥','主动','追击','被动'];
-const TFEATS=['兵刃','谋略','治疗','防御','控制','辅助'];
+const TFEATS=['兵刃','谋略','文武','防御','治疗','辅助'];
 const QUALITY=['橙','紫','蓝'];
 const CAMP_COLOR={魏:'#5b8dff',蜀:'#e0524f',吴:'#3fbf9a',群:'#c9a227'};
 
-// 武将资料库：名字 → 阵营/定位/伤害类型(兵刃=武力/谋略=智力)/自带战法(已知的)
+// 资料库（权威数据源：sgmdtx.com《三国谋定天下》资料站，标注赛季见游戏；仅供参考，可自行修正）
 const GEN_DB={
-  '周瑜':{camp:'吴',role:'输出',dmg:'谋略',auto:'临机制胜'},
-  '陆逊':{camp:'吴',role:'输出',dmg:'谋略'},
-  '大乔':{camp:'吴',role:'辅助',dmg:'谋略'},
-  '小乔':{camp:'吴',role:'控制',dmg:'谋略'},
-  '孙尚香':{camp:'吴',role:'输出',dmg:'兵刃'},
-  '鲁肃':{camp:'吴',role:'控制',dmg:'谋略'},
-  '太史慈':{camp:'吴',role:'输出',dmg:'兵刃'},
-  '甘宁':{camp:'吴',role:'输出',dmg:'兵刃'},
-  '吕蒙':{camp:'吴',role:'坦克',dmg:'兵刃'},
-  '刘备':{camp:'蜀',role:'辅助',dmg:'谋略'},
-  '关羽':{camp:'蜀',role:'输出',dmg:'兵刃'},
-  '张飞':{camp:'蜀',role:'坦克',dmg:'兵刃'},
-  '赵云':{camp:'蜀',role:'输出',dmg:'兵刃'},
-  '马超':{camp:'蜀',role:'输出',dmg:'兵刃'},
-  '诸葛亮':{camp:'蜀',role:'输出',dmg:'谋略'},
-  '姜维':{camp:'蜀',role:'输出',dmg:'兵刃'},
-  '黄月英':{camp:'蜀',role:'辅助',dmg:'谋略'},
-  '黄忠':{camp:'蜀',role:'输出',dmg:'兵刃'},
-  '孟获':{camp:'蜀',role:'坦克',dmg:'兵刃'},
-  '祝融':{camp:'蜀',role:'输出',dmg:'兵刃'},
-  '曹操':{camp:'魏',role:'坦克',dmg:'兵刃'},
-  '司马懿':{camp:'魏',role:'输出',dmg:'谋略'},
-  '郭嘉':{camp:'魏',role:'输出',dmg:'谋略'},
-  '张辽':{camp:'魏',role:'输出',dmg:'兵刃'},
-  '徐晃':{camp:'魏',role:'输出',dmg:'兵刃'},
-  '曹丕':{camp:'魏',role:'辅助',dmg:'谋略'},
-  '张春华':{camp:'魏',role:'控制',dmg:'谋略'},
-  '王异':{camp:'魏',role:'辅助',dmg:'谋略'},
-  '典韦':{camp:'魏',role:'输出',dmg:'兵刃'},
-  '夏侯惇':{camp:'魏',role:'坦克',dmg:'兵刃'},
-  '张郃':{camp:'魏',role:'输出',dmg:'兵刃'},
-  '董卓':{camp:'群',role:'坦克',dmg:'兵刃',auto:'权倾朝野'},
-  '吕布':{camp:'群',role:'输出',dmg:'兵刃'},
-  '贾诩':{camp:'群',role:'输出',dmg:'谋略'},
-  '庞德':{camp:'群',role:'输出',dmg:'兵刃',auto:'陷阵蹈难'},
-  '张宁':{camp:'群',role:'输出',dmg:'谋略'},
-  '甄姬':{camp:'群',role:'辅助',dmg:'谋略'},
-  '貂蝉':{camp:'群',role:'控制',dmg:'谋略'},
-  '皇甫嵩':{camp:'群',role:'坦克',dmg:'兵刃'},
-  '朱儁':{camp:'群',role:'输出',dmg:'谋略'},
-  '田丰':{camp:'群',role:'辅助',dmg:'谋略'},
-  '公孙瓒':{camp:'群',role:'输出',dmg:'兵刃'},
-  '袁绍':{camp:'群',role:'辅助',dmg:'谋略'},
-  '徐庶':{camp:'蜀',role:'输出',dmg:'谋略'},
+  "皇甫嵩":{camp:"群",troop:"骑",role:"输出",dmg:"谋略",auto:"平乱定叛"},
+  "朱儁":{camp:"群",troop:"弓",role:"输出",dmg:"谋略",auto:"围师必阙"},
+  "董卓":{camp:"群",troop:"盾",role:"坦克",dmg:"兵刃",auto:"权倾朝野"},
+  "祝融夫人":{camp:"群",troop:"骑",role:"输出",dmg:"兵刃",auto:"南疆烈刃"},
+  "诸葛亮":{camp:"蜀",troop:"盾",role:"输出",dmg:"谋略",auto:"草船借箭"},
+  "孟获":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"雄护南疆"},
+  "木鹿大王":{camp:"群",troop:"骑",role:"辅助",dmg:"兵刃",auto:"驱兽御象"},
+  "姜维":{camp:"蜀",troop:"枪",role:"输出",dmg:"文武",auto:"九伐中原"},
+  "王异":{camp:"魏",troop:"枪",role:"输出",dmg:"谋略",auto:"巧策引锋"},
+  "左慈":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"云行雨施"},
+  "张宁":{camp:"群",troop:"弓",role:"输出",dmg:"谋略",auto:"太平余响"},
+  "张角":{camp:"群",troop:"盾",role:"输出",dmg:"谋略",auto:"黄天当立"},
+  "蔡文姬":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"悲愤诗"},
+  "步练师":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"淑懿之德"},
+  "田丰":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"荐计阻敌"},
+  "张昭":{camp:"吴",troop:"弓",role:"辅助",dmg:"兵刃",auto:"直谏固政"},
+  "陆逊":{camp:"吴",troop:"盾",role:"输出",dmg:"谋略",auto:"火烧连营"},
+  "孙权":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"虎踞江东"},
+  "鲁肃":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"划湘分荆"},
+  "小乔":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"天香"},
+  "黄盖":{camp:"吴",troop:"盾",role:"坦克",dmg:"兵刃",auto:"苦肉计"},
+  "徐盛":{camp:"魏",troop:"盾",role:"坦克",dmg:"兵刃",auto:"百里疑城"},
+  "吕蒙":{camp:"吴",troop:"盾",role:"输出",dmg:"谋略",auto:"白衣渡江"},
+  "曹操":{camp:"魏",troop:"盾",role:"坦克",dmg:"兵刃",auto:"乱世奸雄"},
+  "刘备":{camp:"蜀",troop:"盾",role:"辅助",dmg:"兵刃",auto:"携民渡江"},
+  "关羽":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"威震华夏"},
+  "张飞":{camp:"蜀",troop:"盾",role:"辅助",dmg:"兵刃",auto:"万人之敌"},
+  "赵云":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"七进七出"},
+  "马超":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"纵马横枪"},
+  "黄忠":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"定军扬威"},
+  "吕布":{camp:"群",troop:"盾",role:"输出",dmg:"兵刃",auto:"骁勇无前"},
+  "貂蝉":{camp:"群",troop:"盾",role:"坦克",dmg:"兵刃",auto:"闭月"},
+  "司马懿":{camp:"魏",troop:"盾",role:"输出",dmg:"谋略",auto:"鹰视狼顾"},
+  "郭嘉":{camp:"魏",troop:"盾",role:"输出",dmg:"谋略",auto:"算无遗策"},
+  "张辽":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"风袭逍遥"},
+  "徐晃":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"长驱直入"},
+  "曹丕":{camp:"魏",troop:"弓",role:"辅助",dmg:"兵刃",auto:"权御九锡"},
+  "张春华":{camp:"魏",troop:"盾",role:"辅助",dmg:"兵刃",auto:"荼蘼心计"},
+  "典韦":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"古之恶来"},
+  "夏侯惇":{camp:"魏",troop:"盾",role:"坦克",dmg:"兵刃",auto:"刚烈"},
+  "张郃":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"大破街亭"},
+  "贾诩":{camp:"魏",troop:"盾",role:"辅助",dmg:"谋略",auto:"诡道玄机"},
+  "庞德":{camp:"群",troop:"盾",role:"输出",dmg:"兵刃",auto:"陷阵蹈难"},
+  "袁绍":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"合聚群雄"},
+  "公孙瓒":{camp:"群",troop:"盾",role:"输出",dmg:"文武",auto:"威震塞外"},
+  "太史慈":{camp:"吴",troop:"盾",role:"输出",dmg:"兵刃",auto:"弦无虚发"},
+  "甘宁":{camp:"吴",troop:"盾",role:"输出",dmg:"兵刃",auto:"锦帆渠魁"},
+  "孙尚香":{camp:"吴",troop:"盾",role:"输出",dmg:"兵刃",auto:"弓腰姬"},
+  "周瑜":{camp:"吴",troop:"盾",role:"输出",dmg:"谋略",auto:"临机制胜"},
+  "大乔":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"国色"},
+  "黄月英":{camp:"蜀",troop:"盾",role:"辅助",dmg:"兵刃",auto:"木牛流马"},
+  "马腾":{camp:"群",troop:"骑",role:"辅助",dmg:"兵刃",auto:"雄踞西凉"}
 };
 
-// 战法资料库：名字 → 类型/特性/品质
 const TAC_DB={
-  '水淹七军':{type:'主动',feat:'控制',q:'橙'},
-  '揭竿而起':{type:'主动',feat:'兵刃',q:'橙'},
-  '战八方':{type:'主动',feat:'兵刃',q:'橙'},
-  '长驱直入':{type:'主动',feat:'兵刃',q:'橙'},
-  '攻其不备':{type:'追击',feat:'控制',q:'橙'},
-  '划湘分荆':{type:'主动',feat:'控制',q:'橙'},
-  '屈人之兵':{type:'主动',feat:'控制',q:'橙'},
-  '水淹八方':{type:'主动',feat:'控制',q:'橙'},
-  '决水':{type:'主动',feat:'谋略',q:'橙'},
-  '出其不意':{type:'主动',feat:'控制',q:'橙'},
-  '奇门':{type:'主动',feat:'谋略',q:'橙'},
-  '五雷正法':{type:'主动',feat:'谋略',q:'橙'},
-  '烈火':{type:'主动',feat:'谋略',q:'橙'},
-  '狂风':{type:'主动',feat:'谋略',q:'橙'},
-  '锐不可当':{type:'被动',feat:'兵刃',q:'橙'},
-  '横征暴敛':{type:'被动',feat:'控制',q:'橙'},
-  '忘私相助':{type:'被动',feat:'防御',q:'紫'},
-  '避其锐气':{type:'指挥',feat:'防御',q:'紫'},
-  '铸甲销戈':{type:'指挥',feat:'防御',q:'紫'},
-  '舍生取义':{type:'指挥',feat:'辅助',q:'紫'},
-  '以静制动':{type:'指挥',feat:'辅助',q:'紫'},
-  '如有神助':{type:'主动',feat:'辅助',q:'紫'},
-  '如沐春风':{type:'主动',feat:'治疗',q:'紫'},
-  '迎敌':{type:'指挥',feat:'防御',q:'紫'},
-  '骄勇之姿':{type:'被动',feat:'兵刃',q:'紫'},
-  '指点':{type:'指挥',feat:'治疗',q:'紫'},
+  "胜敌益强":{type:"被动",feat:"文武",q:"橙"},
+  "锐不可当":{type:"被动",feat:"辅助",q:"橙"},
+  "折冲御侮":{type:"指挥",feat:"防御",q:"橙"},
+  "调和阴阳":{type:"指挥",feat:"防御",q:"橙"},
+  "指点乾坤":{type:"主动",feat:"文武",q:"橙"},
+  "践墨随敌":{type:"被动",feat:"防御",q:"橙"},
+  "九伐中原":{type:"指挥",feat:"文武",q:"橙"},
+  "百战不殆":{type:"指挥",feat:"辅助",q:"橙"},
+  "惩前毖后":{type:"指挥",feat:"谋略",q:"橙"},
+  "云行雨施":{type:"指挥",feat:"辅助",q:"橙"},
+  "烈火张天":{type:"主动",feat:"文武",q:"橙"},
+  "知人善任":{type:"主动",feat:"防御",q:"橙"},
+  "明其虚实":{type:"主动",feat:"谋略",q:"橙"},
+  "韬光养晦":{type:"被动",feat:"谋略",q:"橙"},
+  "断戈夺锋":{type:"主动",feat:"兵刃",q:"橙"},
+  "水淹七军":{type:"主动",feat:"兵刃",q:"橙"},
+  "揭竿而起":{type:"主动",feat:"兵刃",q:"紫"},
+  "战八方":{type:"主动",feat:"兵刃",q:"橙"},
+  "长驱直入":{type:"主动",feat:"兵刃",q:"橙"},
+  "出其不意":{type:"主动",feat:"谋略",q:"橙"},
+  "奇门遁甲":{type:"主动",feat:"谋略",q:"橙"},
+  "权倾朝野":{type:"指挥",feat:"文武",q:"橙"},
+  "围师必阙":{type:"主动",feat:"谋略",q:"橙"},
+  "火烧连营":{type:"主动",feat:"谋略",q:"橙"},
+  "草船借箭":{type:"指挥",feat:"谋略",q:"橙"},
+  "巧策引锋":{type:"被动",feat:"谋略",q:"橙"},
+  "太平余响":{type:"指挥",feat:"谋略",q:"橙"},
+  "鹰视狼顾":{type:"主动",feat:"谋略",q:"橙"},
+  "算无遗策":{type:"指挥",feat:"谋略",q:"橙"},
+  "风袭逍遥":{type:"被动",feat:"辅助",q:"橙"},
+  "骁勇无前":{type:"主动",feat:"兵刃",q:"橙"},
+  "七进七出":{type:"被动",feat:"兵刃",q:"橙"},
+  "纵马横枪":{type:"被动",feat:"兵刃",q:"橙"},
+  "万人之敌":{type:"主动",feat:"兵刃",q:"橙"},
+  "威震华夏":{type:"主动",feat:"兵刃",q:"橙"},
+  "定军扬威":{type:"追击",feat:"兵刃",q:"橙"},
+  "闭月":{type:"被动",feat:"防御",q:"橙"},
+  "苦肉计":{type:"主动",feat:"防御",q:"橙"},
+  "百里疑城":{type:"指挥",feat:"防御",q:"橙"},
+  "白衣渡江":{type:"主动",feat:"谋略",q:"橙"},
+  "乱世奸雄":{type:"指挥",feat:"辅助",q:"橙"},
+  "携民渡江":{type:"指挥",feat:"治疗",q:"橙"},
+  "天香":{type:"主动",feat:"治疗",q:"橙"},
+  "虎踞江东":{type:"指挥",feat:"辅助",q:"橙"},
+  "划湘分荆":{type:"主动",feat:"防御",q:"橙"},
+  "国色":{type:"指挥",feat:"辅助",q:"橙"},
+  "木牛流马":{type:"指挥",feat:"辅助",q:"橙"},
+  "悲愤诗":{type:"主动",feat:"治疗",q:"橙"},
+  "淑懿之德":{type:"主动",feat:"辅助",q:"橙"},
+  "荐计阻敌":{type:"主动",feat:"辅助",q:"橙"},
+  "直谏固政":{type:"主动",feat:"治疗",q:"橙"},
+  "平乱定叛":{type:"指挥",feat:"防御",q:"橙"},
+  "权御九锡":{type:"指挥",feat:"辅助",q:"橙"},
+  "荼蘼心计":{type:"指挥",feat:"辅助",q:"橙"},
+  "古之恶来":{type:"被动",feat:"兵刃",q:"橙"},
+  "刚烈":{type:"被动",feat:"兵刃",q:"橙"},
+  "大破街亭":{type:"主动",feat:"兵刃",q:"橙"},
+  "诡道玄机":{type:"指挥",feat:"谋略",q:"橙"},
+  "陷阵蹈难":{type:"被动",feat:"兵刃",q:"橙"},
+  "合聚群雄":{type:"指挥",feat:"辅助",q:"橙"},
+  "威震塞外":{type:"追击",feat:"文武",q:"橙"},
+  "弦无虚发":{type:"被动",feat:"兵刃",q:"橙"},
+  "锦帆渠魁":{type:"被动",feat:"兵刃",q:"橙"},
+  "弓腰姬":{type:"追击",feat:"兵刃",q:"橙"},
+  "驱兽御象":{type:"指挥",feat:"谋略",q:"橙"},
+  "雄护南疆":{type:"指挥",feat:"辅助",q:"橙"},
+  "临机制胜":{type:"指挥",feat:"谋略",q:"橙"},
+  "黄天当立":{type:"主动",feat:"谋略",q:"橙"},
+  "避其锐气":{type:"指挥",feat:"防御",q:"紫"},
+  "铸甲销戈":{type:"指挥",feat:"防御",q:"紫"},
+  "舍生取义":{type:"指挥",feat:"辅助",q:"橙"},
+  "横征暴敛":{type:"被动",feat:"防御",q:"橙"}
 };
 
 // 强势体系/组合参考（真实演武攻略）
 const SYSTEMS=[
-  {tier:'T0',name:'周瑜·大都督核',core:'周瑜 + 大乔 + 控制位(小乔/陆逊)',note:'周瑜机制强，靠异常状态触发临机制胜爆输出；大乔带暴敛/以静，双弓双控压制。'},
-  {tier:'T0',name:'桃园队',core:'刘备 + 关羽 + 张飞',note:'阵营+羁绊双加成，刘备保生存即可，非常稳定的一队；技能别太抽象就行。'},
-  {tier:'T0',name:'诸葛·天水麒麟',core:'诸葛亮 + 马超 + 治疗位(黄月英)',note:'诸葛马超联动，注意伤害总和要够，别打不动。'},
-  {tier:'T0',name:'曹操·五雷郭嘉',core:'曹操 + 郭嘉 + 治疗/坦位',note:'郭嘉出其不意/奇门/五雷，单卡强度高，爆发足。'},
-  {tier:'T0',name:'汉盾体系',core:'皇甫嵩 + 朱儁 + 前排',note:'汉盾减伤体系，皇甫嵩一统加点，前排极硬。'},
-  {tier:'T1',name:'周瑜·贾诩',core:'周瑜 + 贾诩 + 坦位',note:'双谋略爆发，贾诩毒伤补控制。'},
-  {tier:'T1',name:'陆逊·火攻',core:'陆逊 + 稳定火(烈火/决水) + 坦/奶',note:'陆逊演武很强，靠持续火伤压制。'},
-  {tier:'T1',name:'五虎上将',core:'关羽/张飞/赵云/马超/黄忠 任选3',note:'羁绊暴击加成，注意战法冲突别重叠。'},
+  {tier:'T0',name:'大汉盾体系',core:'皇甫嵩 + 朱儁 + 卢植/汉盾前排',
+   note:'皇甫嵩靠「百战不殆」狂叠统率(中后期全队统率600+)，坦度拉满、自带战法4000-7000爆发；朱儁触发「汉末栋梁」羁绊减伤。克兵刃体系(赵甘姜几乎打不动)，怕陆逊火与「断粮」。'},
+  {tier:'T0',name:'南蛮·双借刀',core:'祝融夫人 + 诸葛亮 + 孟获',
+   note:'雁形阵，祝融夫人后排输出核心；诸葛亮(折冲御侮+调和阴阳)+孟获(指点乾坤+践墨随敌)双借刀体系，全赛季通用。'},
+  {tier:'T0',name:'诸葛姜维',core:'诸葛亮 + 姜维 + 辅助/坦',
+   note:'姜维「九伐中原」文武伤害+「胜敌益强」联动快速叠智武；诸葛亮带「惩前毖后」稳定触发姜维被动，伤害要高。'},
+  {tier:'T0',name:'王异·谋略追击',core:'王异 + 辅助/坦 + 治疗位',
+   note:'王异(魏·枪)自带「巧策引锋」谋略追击核心，配防御/治疗位站桩输出；S7起被「断戈夺锋」针对需注意。'},
+  {tier:'T0',name:'左慈张宁',core:'左慈 + 张宁 + 蔡文姬(最稳)/张角',
+   note:'左慈「云行雨施」全队主动战法发动率+保护，张宁「太平余响」谋略爆发；带蔡文姬最稳(抵御防爆发)，也可换田丰/步练师/张昭。'},
+  {tier:'T0',name:'陆逊·火攻',core:'陆逊 + 孙权/左慈/鲁肃/小乔/黄盖',
+   note:'陆逊「火烧连营」谋略火伤压制，演武强势；怕被断粮/高速压制。可配左慈提发动率、孙权/鲁肃续航。'},
 ];
 
 /* =========================================================
@@ -368,7 +425,7 @@ function onGenName(id,v){const g=state.generals.find(x=>x.id===id);if(!g)return;
 function onTacName(id,v){const t=state.tactics.find(x=>x.id===id);if(!t)return;t.name=v;const db=TAC_DB[v.trim()];if(db){t.type=db.type;t.feat=db.feat;t.q=db.q;renderTactics();}save();}
 function updG(id,k,v){const g=state.generals.find(x=>x.id===id);if(g){g[k]=v;if(k==='power'){const r=document.querySelector(`.erow[data-id="${id}"] .val`);if(r)r.textContent=v;}save();}}
 function updT(id,k,v){const t=state.tactics.find(x=>x.id===id);if(t){t[k]=v;if(k==='power'){const r=document.querySelector(`.erow[data-id="${id}"] .val`);if(r)r.textContent=v;}save();}}
-function addGeneral(){state.generals.push({id:nid(),name:'',camp:'群',troop:'步',role:'输出',dmg:'兵刃',power:6});renderGenerals();save();}
+function addGeneral(){state.generals.push({id:nid(),name:'',camp:'群',troop:'盾',role:'输出',dmg:'兵刃',power:6});renderGenerals();save();}
 function addTactic(){state.tactics.push({id:nid(),name:'',type:'主动',feat:'兵刃',q:'橙',power:6});renderTactics();save();}
 function delG(id){state.generals=state.generals.filter(x=>x.id!==id);renderGenerals();save();}
 function delT(id){state.tactics=state.tactics.filter(x=>x.id!==id);renderTactics();save();}
@@ -381,7 +438,7 @@ function parseGenerals(){
   ta.value.split(/\n/).forEach(line=>{line=line.trim();if(!line)return;const p=line.split(/[,，\s]+/).filter(Boolean);if(!p.length)return;
     const name=p[0];const db=GEN_DB[name]||{};
     let camp=CAMPS.find(c=>p.some(x=>x===c))||db.camp||'群';
-    let troop=TROOPS.find(c=>p.some(x=>x===c))||'步';
+    let troop=TROOPS.find(c=>p.some(x=>x===c))||db.troop||'盾';
     let role=ROLES.find(c=>p.some(x=>x===c))||db.role||'输出';
     let dmg=DMG.find(c=>p.some(x=>x===c))||db.dmg||'兵刃';
     let power=parseFloat(p.find(x=>/^\d+(\.\d+)?$/.test(x)&&+x<=10&&+x>=1))||6;
@@ -405,24 +462,23 @@ function parseTactics(){
    四、真实示例卡池
    ========================================================= */
 function loadExample(){
-  const G=(name,power)=>{const db=GEN_DB[name]||{};return {id:nid(),name,camp:db.camp||'群',troop:'步',role:db.role||'输出',dmg:db.dmg||'兵刃',power};};
+  const G=(name,power)=>{const db=GEN_DB[name]||{};return {id:nid(),name,camp:db.camp||'群',troop:db.troop||'盾',role:db.role||'输出',dmg:db.dmg||'兵刃',power};};
   const T=(name,power)=>{const db=TAC_DB[name]||{};return {id:nid(),name,type:db.type||'主动',feat:db.feat||'兵刃',q:db.q||'橙',power};};
   state.generals=[
-    G('周瑜',9.5),G('大乔',8),G('小乔',7),        // 周瑜·大都督核（核心+配套）
-    G('刘备',6.5),G('关羽',8.5),G('张飞',8),       // 桃园（刘备保生存）
-    G('司马懿',9),G('郭嘉',8.5),G('张辽',7),      // 魏·谋略爆发
-    G('吕布',9),                                  // 群·单核
+    G('皇甫嵩',9.5),G('朱儁',8.5),                    // 大汉盾
+    G('祝融夫人',9),G('诸葛亮',9),G('孟获',7.5),      // 南蛮·双借刀
+    G('姜维',9),                                       // 诸葛姜维(与诸葛亮)
+    G('左慈',8),G('张宁',8.5),G('蔡文姬',7),          // 左慈张宁
+    G('陆逊',9),                                       // 陆逊火攻
   ];
-  state.generals[0].troop='弓';state.generals[1].troop='步';state.generals[2].troop='弓';
   state.tactics=[
-    T('水淹七军',9),T('揭竿而起',7),T('长驱直入',7),T('战八方',7),
-    T('决水',8),T('出其不意',8),T('奇门',7),T('五雷正法',8),
-    T('烈火',7),T('狂风',6),T('攻其不备',7),T('横征暴敛',7),
-    T('避其锐气',6),T('铸甲销戈',6),T('舍生取义',6),T('以静制动',6),
-    T('如有神助',6),T('如沐春风',6),T('迎敌',5),T('锐不可当',6),
+    T('水淹七军',9),T('战八方',8),T('揭竿而起',7),T('出其不意',8),T('奇门遁甲',8),
+    T('火烧连营',9),T('草船借箭',8),T('鹰视狼顾',8),T('围师必阙',8),T('太平余响',8),
+    T('巧策引锋',8),T('临机制胜',8),T('九伐中原',9),T('胜敌益强',8),T('指点乾坤',8),
+    T('百战不殆',8),T('折冲御侮',7),T('避其锐气',6),T('悲愤诗',7),T('云行雨施',8),
   ];
   renderGenerals();renderTactics();save();switchTab('in');
-  alert('🎲 已载入真实示例池（10 武将 / 20 战法，含周瑜大都督核+桃园+魏群）。可直接生成体验。');
+  alert('🎲 已载入 S17 真实示例池（大汉盾+南蛮+诸葛姜维+左慈张宁+陆逊，10武将/20战法）。可直接生成体验。');
 }
 
 /* =========================================================
@@ -455,7 +511,8 @@ function evalTeam(team){
   BONDS.forEach(b=>{const hit=b.members.filter(n=>names.includes(n)).length;if(hit>=b.need){bondBonus+=b.bonus;bonds.push(b.name);}});
   const roles=[...new Set(team.map(g=>g.role))];
   let compBonus=0;const notes=[];
-  if(roles.includes('坦克'))compBonus+=0.03; else notes.push('无前排承伤');
+  const hasFront=roles.includes('坦克')||team.some(g=>g.troop==='盾');
+  if(hasFront)compBonus+=0.03; else notes.push('无前排承伤(无盾兵/坦克)');
   if(roles.includes('输出'))compBonus+=0.04; else notes.push('⚠️缺输出，难全歼');
   if(roles.includes('辅助')||roles.includes('控制'))compBonus+=0.03;
   const mult=1+campBonus+troopBonus+bondBonus+compBonus;
@@ -481,8 +538,9 @@ function teamCost(teams){
   teams.forEach(t=>{
     if(!t.length)return;
     const rs=t.map(g=>g.role);
+    const hasFront=rs.includes('坦克')||t.some(g=>g.troop==='盾');
     if(!rs.includes('输出'))rolePen+=2.5;             // 缺输出：难全歼（最严重）
-    if(!rs.includes('坦克'))rolePen+=1.4;             // 无前排：站不住
+    if(!hasFront)rolePen+=1.4;                         // 无前排(盾兵/坦克)：站不住
     if(!rs.includes('辅助')&&!rs.includes('控制'))rolePen+=0.7; // 无辅/控：缺续航与控制
   });
   if(state.mode==='dual'){
@@ -538,19 +596,19 @@ function distribute(gens){
   return teams;
 }
 
-// 战法特性→武将 适配度（区分兵刃/谋略伤害类型）
+// 战法特性→武将 适配度（兵刃/谋略/文武 区分）
 function featFit(feat,role,dmg){
   if(role==='输出'){
-    if(feat===dmg)return 3.8;                 // 兵刃将带兵刃 / 谋略将带谋略 = 完美
-    if(feat==='兵刃'||feat==='谋略')return 0.6; // 反类型仍可但有损耗
-    if(feat==='控制')return 0.7;
+    const types = dmg==='文武' ? ['兵刃','谋略','文武'] : [dmg];
+    if(feat==='文武')return 3.5;                // 文武战法=双修输出，通用
+    if(types.includes(feat))return 3.8;         // 完全匹配
+    if(feat==='兵刃'||feat==='谋略')return 0.7; // 反类型可带但损耗
     if(feat==='辅助')return 0.4;
-    return 0.1;
+    return 0.2;
   }
-  if(role==='坦克'){if(feat==='防御')return 3.8;if(feat==='辅助')return 1.2;if(feat==='兵刃'||feat==='谋略')return 0.3;return 0.1;}
-  if(role==='辅助'){if(feat==='治疗'||feat==='辅助')return 3.8;if(feat==='防御')return 1.2;if(feat==='控制')return 0.8;return 0.2;}
-  if(role==='控制'){if(feat==='控制')return 3.8;if(feat==='谋略')return 1.0;if(feat==='辅助')return 0.8;return 0.2;}
-  return 0;
+  if(role==='坦克'){if(feat==='防御')return 3.8;if(feat==='辅助')return 1.2;if(feat==='兵刃'||feat==='谋略'||feat==='文武')return 0.3;return 0.1;}
+  if(role==='辅助'){if(feat==='治疗'||feat==='辅助')return 3.8;if(feat==='防御')return 1.2;if(feat==='文武')return 0.8;return 0.2;}
+  return 0.1;
 }
 
 function assignTactics(teams,tactics){
@@ -725,7 +783,7 @@ function renderRef(){
 function loadSystem(coreStr){
   const names=(coreStr.match(/[\u4e00-\u9fa5]{2,4}/g)||[]).filter(n=>GEN_DB[n]);
   if(!names.length){alert('该系统核心武将未收录到资料库，请手动添加');return;}
-  names.forEach(n=>{if(!state.generals.some(g=>g.name===n)){const db=GEN_DB[n];state.generals.push({id:nid(),name:n,camp:db.camp,troop:'步',role:db.role,dmg:db.dmg||'兵刃',power:8});}});
+  names.forEach(n=>{if(!state.generals.some(g=>g.name===n)){const db=GEN_DB[n];state.generals.push({id:nid(),name:n,camp:db.camp,troop:db.troop||'盾',role:db.role,dmg:db.dmg||'兵刃',power:8});}});
   renderGenerals();save();alert('✅ 已载入：'+names.join('、')+'（请到「录入卡池」调整兵种/强度）');
 }
 
