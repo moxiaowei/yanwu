@@ -3,167 +3,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>演武大会 · 三队方案生成器</title>
+<title>演武大会 · 三队方案生成器（三国谋定天下）</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  :root{
-    --bg:#0e1016;--panel:#171b26;--panel2:#1f2534;--line:#2b3346;
-    --txt:#e9edf6;--sub:#8a97b0;--gold:#e6b34a;--red:#e0524f;--jade:#3fbf9a;--blue:#5b8dff;
-  }
+  :root{--bg:#0e1016;--panel:#171b26;--panel2:#1f2534;--line:#2b3346;--txt:#e9edf6;--sub:#8a97b0;
+    --gold:#e6b34a;--red:#e0524f;--jade:#3fbf9a;--blue:#5b8dff;--purple:#a77bff}
   body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
-    background:radial-gradient(1100px 520px at 50% -12%,#20263a 0%,var(--bg) 58%);
-    color:var(--txt);min-height:100vh;padding:0 0 60px;-webkit-font-smoothing:antialiased;line-height:1.5}
-  .wrap{max-width:1000px;margin:0 auto;padding:0 16px}
-  header{padding:38px 0 8px;text-align:center}
-  .title{font-size:26px;font-weight:800;letter-spacing:1px;
+    background:radial-gradient(1100px 520px at 50% -12%,#20263a 0%,var(--bg) 58%);color:var(--txt);
+    min-height:100vh;padding:0 0 60px;-webkit-font-smoothing:antialiased;line-height:1.5}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+  header{padding:34px 0 6px;text-align:center}
+  .title{font-size:24px;font-weight:800;letter-spacing:1px;
     background:linear-gradient(100deg,#f2d489,#e6b34a 45%,#e0524f);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .subtitle{color:var(--sub);font-size:13px;margin-top:8px}
-  .insight{margin:20px auto 0;max-width:760px;padding:14px 16px;border-radius:12px;font-size:12.5px;line-height:1.7;color:#cfd8ea;
+  .subtitle{color:var(--sub);font-size:12.5px;margin-top:7px}
+  .insight{margin:18px auto 0;max-width:820px;padding:14px 16px;border-radius:12px;font-size:12.5px;line-height:1.75;color:#cfd8ea;
     background:linear-gradient(120deg,rgba(230,179,74,.10),rgba(224,82,79,.06));border:1px solid rgba(230,179,74,.28)}
-  .insight b{color:var(--gold)}
-  .insight .hi{color:var(--red);font-weight:700}
-  /* tabs */
-  .tabs{display:flex;gap:8px;margin:26px 0 0;border-bottom:1px solid var(--line)}
-  .tab{flex:1;text-align:center;padding:12px;font-size:14px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;transition:.18s}
+  .insight b{color:var(--gold)} .insight .hi{color:var(--red);font-weight:700} .insight .ok{color:var(--jade);font-weight:700}
+  .insight .row{margin-top:6px}
+  .tabs{display:flex;gap:6px;margin:22px 0 0;border-bottom:1px solid var(--line);overflow-x:auto}
+  .tab{padding:12px 14px;font-size:13.5px;font-weight:700;color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.18s}
   .tab.on{color:var(--gold);border-bottom-color:var(--gold)}
-  .pane{display:none;padding-top:20px;animation:fade .25s}
+  .pane{display:none;padding-top:18px;animation:fade .25s}
   .pane.on{display:block}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  /* section head */
-  .sh{display:flex;align-items:center;gap:9px;font-size:14.5px;font-weight:700;margin:6px 2px 12px;color:#c8d3e8}
+  .sh{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;margin:6px 2px 12px;color:#c8d3e8;flex-wrap:wrap}
   .sh .bar{width:4px;height:15px;border-radius:3px;background:linear-gradient(var(--gold),var(--red))}
-  .sh .cnt{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+  .sh .cnt{margin-left:auto;font-size:11px;font-weight:600;color:var(--sub);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
   .sh .mini{font-size:11px;font-weight:600;color:var(--blue);cursor:pointer;padding:3px 9px;border:1px solid rgba(91,141,255,.4);border-radius:8px;background:rgba(91,141,255,.08)}
   .sh .mini:hover{background:rgba(91,141,255,.18)}
-  /* bulk box */
-  .bulk{display:none;margin:0 0 14px}
-  .bulk.on{display:block}
-  .bulk textarea{width:100%;height:110px;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--txt);
-    padding:11px 13px;font-size:13px;font-family:inherit;resize:vertical;line-height:1.6}
-  .bulk .row{display:flex;gap:10px;margin-top:9px;align-items:center;flex-wrap:wrap}
-  .bulk .tip{font-size:11.5px;color:var(--sub);flex:1;min-width:200px}
-  .btn{padding:9px 18px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:.16s;font-family:inherit}
+  .bulk{display:none;margin:0 0 14px} .bulk.on{display:block}
+  .bulk textarea{width:100%;height:96px;background:var(--panel);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 12px;font-size:12.5px;font-family:inherit;resize:vertical;line-height:1.55}
+  .bulk .row{display:flex;gap:10px;margin-top:8px;align-items:center;flex-wrap:wrap}
+  .bulk .tip{font-size:11px;color:var(--sub);flex:1;min-width:200px}
+  .btn{padding:9px 17px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:.16s;font-family:inherit}
   .btn.primary{background:linear-gradient(100deg,var(--gold),#d99a2a);color:#1a1206;box-shadow:0 6px 18px -8px rgba(230,179,74,.8)}
   .btn.primary:hover{filter:brightness(1.08)}
-  .btn.ghost{background:var(--panel2);color:#bcc7dd;border-color:var(--line)}
-  .btn.ghost:hover{border-color:#3d4a66;color:#fff}
-  .btn.blue{background:rgba(91,141,255,.14);color:#9db9ff;border-color:rgba(91,141,255,.4)}
-  .btn.blue:hover{background:rgba(91,141,255,.24)}
-  /* entry rows */
-  .list{display:flex;flex-direction:column;gap:10px}
-  .erow{display:grid;grid-template-columns:1.4fr .8fr .8fr 1fr 1.6fr auto;gap:8px;align-items:center;
-    background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 11px}
-  .erow.tac{grid-template-columns:1.6fr 1fr 1fr 1.6fr auto}
-  .erow input,.erow select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);
-    padding:8px 9px;font-size:13px;font-family:inherit;width:100%}
+  .btn.ghost{background:var(--panel2);color:#bcc7dd;border-color:var(--line)} .btn.ghost:hover{border-color:#3d4a66;color:#fff}
+  .btn.blue{background:rgba(91,141,255,.14);color:#9db9ff;border-color:rgba(91,141,255,.4)} .btn.blue:hover{background:rgba(91,141,255,.24)}
+  .list{display:flex;flex-direction:column;gap:9px}
+  .erow{display:grid;grid-template-columns:1.15fr .6fr .55fr .8fr .7fr 1.3fr auto;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 10px}
+  .erow.tac{grid-template-columns:1.5fr .9fr .9fr .7fr 1.3fr auto}
+  .erow input,.erow select{background:var(--panel2);border:1px solid var(--line);border-radius:7px;color:var(--txt);padding:7px 8px;font-size:12.5px;font-family:inherit;width:100%}
   .erow input:focus,.erow select:focus{outline:none;border-color:var(--gold)}
-  .pw{display:flex;align-items:center;gap:8px}
+  .pw{display:flex;align-items:center;gap:7px}
   .pw input[type=range]{padding:0;accent-color:var(--gold);height:5px}
-  .pw .val{min-width:26px;text-align:center;font-weight:800;color:var(--gold);font-size:13px;font-variant-numeric:tabular-nums}
-  .del{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:#8a97b0;
-    cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .pw .val{min-width:24px;text-align:center;font-weight:800;color:var(--gold);font-size:12.5px;font-variant-numeric:tabular-nums}
+  .auto{font-size:10.5px;color:var(--purple);margin-top:2px}
+  .del{width:28px;height:28px;border-radius:7px;border:1px solid var(--line);background:var(--panel2);color:#8a97b0;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
   .del:hover{color:var(--red);border-color:rgba(224,82,79,.5)}
-  .addrow{margin-top:11px;display:flex;gap:10px;flex-wrap:wrap}
-  .empty{text-align:center;color:var(--sub);font-size:13px;padding:26px;border:1px dashed var(--line);border-radius:11px}
-  /* support badge toggle */
-  .sup{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--sub);white-space:nowrap;justify-content:center}
-  .sup input{width:auto;accent-color:var(--jade)}
-  /* generate bar */
-  .genbar{margin:26px 0 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .addrow{margin-top:10px;display:flex;gap:9px;flex-wrap:wrap}
+  .empty{text-align:center;color:var(--sub);font-size:12.5px;padding:24px;border:1px dashed var(--line);border-radius:11px}
+  .genbar{margin:24px 0 0;display:flex;gap:11px;flex-wrap:wrap;align-items:center}
   .genbar .spacer{flex:1}
+  /* mode toggle */
+  .modes{display:flex;gap:10px;margin:16px 0 0;flex-wrap:wrap}
+  .mode{flex:1;min-width:220px;padding:13px 15px;border-radius:12px;border:1px solid var(--line);background:var(--panel);cursor:pointer;transition:.16s}
+  .mode.on{border-color:var(--gold);background:linear-gradient(140deg,rgba(230,179,74,.12),var(--panel));box-shadow:0 0 0 1px rgba(230,179,74,.3)}
+  .mode .mt{font-size:14px;font-weight:800;color:#dfe6f3;display:flex;align-items:center;gap:7px}
+  .mode .md{font-size:11.5px;color:var(--sub);margin-top:5px;line-height:1.55}
+  .mode.on .mt{color:var(--gold)}
+  .flevrow{display:flex;gap:8px;flex-wrap:wrap}
+  .flev{padding:8px 16px;border-radius:20px;font-size:12.5px;font-weight:700;color:var(--sub);background:var(--panel);border:1px solid var(--line);cursor:pointer;transition:.15s}
+  .flev.on{color:#0e1016;background:linear-gradient(100deg,var(--gold),#d99a2a);border-color:transparent}
   /* results */
-  .sum{margin:22px 0 16px;padding:16px 18px;border-radius:13px;background:var(--panel);border:1px solid var(--line)}
-  .sum h3{font-size:14.5px;margin-bottom:10px;color:var(--gold);display:flex;align-items:center;gap:8px}
+  .sum{margin:18px 0 14px;padding:16px 18px;border-radius:13px;background:var(--panel);border:1px solid var(--line)}
+  .sum h3{font-size:14px;margin-bottom:10px;color:var(--gold);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .balance{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:6px 0 10px;background:var(--panel2)}
   .balance .seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0e1016;transition:.3s}
-  .sum .note{font-size:12.5px;color:#c0cbe0;line-height:1.7}
-  .sum .note b{color:var(--jade)}
-  .sum .note .warn{color:var(--red);font-weight:700}
-  .teams{display:grid;grid-template-columns:1fr;gap:14px}
-  @media(min-width:760px){.teams{grid-template-columns:1fr 1fr 1fr}}
+  .statrow{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .stat{flex:1;min-width:110px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:center}
+  .stat .sv{font-size:19px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+  .stat .sl{font-size:10.5px;color:var(--sub);margin-top:2px}
+  .sum .note{font-size:12.5px;color:#c0cbe0;line-height:1.7} .sum .note b{color:var(--jade)} .sum .note .warn{color:var(--red);font-weight:700}
+  .teams{display:grid;grid-template-columns:1fr;gap:13px}
+  @media(min-width:800px){.teams{grid-template-columns:1fr 1fr 1fr}}
   .tcard{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:15px;overflow:hidden}
-  .tcard .thead{padding:13px 15px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line)}
+  .tcard .thead{padding:12px 14px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--line)}
   .tcard .tname{font-size:15px;font-weight:800}
+  .tcard .trole{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(230,179,74,.14);color:#f2d489;border:1px solid rgba(230,179,74,.3)}
   .tcard .tscore{margin-left:auto;font-size:13px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
-  .tcard .tscore small{color:var(--sub);font-weight:600;font-size:10.5px;display:block;text-align:right}
-  .tcard .tbody{padding:13px 15px;display:flex;flex-direction:column;gap:11px}
-  .gen{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 11px}
-  .gen .ghead{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
-  .gen .gname{font-size:14px;font-weight:800}
-  .chip{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;border:1px solid transparent}
+  .tcard .tscore small{color:var(--sub);font-weight:600;font-size:10px;display:block;text-align:right}
+  .tcard .tbody{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+  .gen{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+  .gen .ghead{display:flex;align-items:center;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+  .gen .gname{font-size:13.5px;font-weight:800}
+  .chip{font-size:10px;font-weight:700;padding:2px 6px;border-radius:5px;border:1px solid transparent}
   .chip.camp{background:rgba(91,141,255,.12);border-color:rgba(91,141,255,.3)}
   .chip.role{background:rgba(230,179,74,.12);border-color:rgba(230,179,74,.3);color:#f2d489}
   .chip.troop{background:rgba(63,191,154,.1);border-color:rgba(63,191,154,.28);color:#7fe0c4}
-  .gen .gpw{margin-left:auto;font-weight:800;color:var(--gold);font-size:13px}
-  .tacs{display:flex;flex-wrap:wrap;gap:6px}
-  .tac{font-size:11.5px;padding:4px 9px;border-radius:7px;background:var(--panel);border:1px solid var(--line);color:#c4cfe4}
-  .tac .tt{color:var(--sub);font-size:9.5px;margin-left:3px}
+  .gen .gpw{margin-left:auto;font-weight:800;color:var(--gold);font-size:12.5px}
+  .tacs{display:flex;flex-wrap:wrap;gap:5px}
+  .tac{font-size:11px;padding:3px 8px;border-radius:6px;background:var(--panel);border:1px solid var(--line);color:#c4cfe4}
+  .tac .tt{font-size:9px;margin-left:3px;opacity:.75}
   .tac.match{border-color:rgba(63,191,154,.4);background:rgba(63,191,154,.08)}
   .tac.miss{border-color:rgba(224,82,79,.32);background:rgba(224,82,79,.07);color:#e8a9a8}
   .tac.none{color:#6a7690;border-style:dashed}
-  .tcard .tfoot{padding:11px 15px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.6;color:#a9b6cd}
-  .tcard .tfoot .ok{color:var(--jade)}
-  .tcard .tfoot .bad{color:var(--red)}
-  .bench{margin-top:16px;font-size:12.5px;color:var(--sub)}
-  .bench b{color:#c0cbe0}
-  .bench .bchip{display:inline-block;margin:3px 6px 0 0;padding:4px 10px;border-radius:8px;background:var(--panel);border:1px dashed var(--line);color:#94a1b9;font-size:11.5px}
+  .q-or{color:#ffcf6a} .q-zi{color:#c39bff} .q-lan{color:#7fb4ff}
+  .tcard .tfoot{padding:10px 14px;border-top:1px solid var(--line);font-size:11px;line-height:1.6;color:#a9b6cd}
+  .tcard .tfoot .ok{color:var(--jade)} .tcard .tfoot .bad{color:var(--red)}
+  .bench{margin-top:14px;font-size:12px;color:var(--sub)} .bench b{color:#c0cbe0}
+  .bench .bchip{display:inline-block;margin:3px 5px 0 0;padding:3px 9px;border-radius:7px;background:var(--panel);border:1px dashed var(--line);color:#94a1b9;font-size:11px}
+  /* reference library */
+  .refgrid{display:grid;grid-template-columns:1fr;gap:11px}
+  @media(min-width:680px){.refgrid{grid-template-columns:1fr 1fr}}
+  .refcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .refcard .rt{font-size:13.5px;font-weight:800;color:var(--gold);display:flex;align-items:center;gap:7px}
+  .refcard .rt .tier{font-size:10px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(224,82,79,.15);color:#ff9d9b;border:1px solid rgba(224,82,79,.3)}
+  .refcard .rm{font-size:12px;color:#b8c4da;margin-top:7px;line-height:1.6}
+  .refcard .rm b{color:#dfe6f3}
+  .refcard .load{margin-top:9px;font-size:11px;font-weight:700;color:var(--blue);cursor:pointer}
+  .legend{font-size:11.5px;color:var(--sub);line-height:1.8;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:13px 15px;margin-top:14px}
+  .legend b{color:#dfe6f3} .legend .k{color:var(--gold);font-weight:700}
   @media(max-width:560px){
     .erow{grid-template-columns:1fr 1fr;grid-auto-rows:auto}
     .erow input:first-child{grid-column:1/3}
     .erow.tac{grid-template-columns:1fr 1fr}
     .erow.tac input:first-child{grid-column:1/3}
+    .tab{font-size:12.5px;padding:11px 10px}
   }
-  .foot{text-align:center;color:#5a6580;font-size:11px;margin-top:34px;line-height:1.7}
+  .foot{text-align:center;color:#5a6580;font-size:11px;margin-top:30px;line-height:1.7}
+  .src{color:#6b7a99;font-size:10.5px;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div class="title">⚔️ 演武大会 · 三队方案生成器</div>
-    <div class="subtitle">输入本期武将卡池 & 战法卡池 → 一键生成战力均衡的最佳三队配置</div>
+    <div class="subtitle">《三国谋定天下》· 输入本期武将 & 战法卡池 → 生成均衡/双核三队方案 + 出线概率估算</div>
   </header>
 
   <div class="insight">
-    💡 <b>核心策略</b>：演武大会积分 <b>3:0=10分 · 2:1=9分 · 1:2=仅1分 · 0:3=0分</b>。
-    所以「一队超强、两队孱弱」是<span class="hi">灾难</span>（赢1输2只得1分）；
-    真正的最优解是<b>三队战力尽量均衡、每队都有输出+前排+辅助</b>，稳拿 9 分档。
-    本工具正是按「最小化三队战力差 + 定位互补」来分配。
+    <div class="row">📐 <b>演武机制</b>：积分赛 <b>10 局</b>，一般 <b>6:4 出线</b>（需胜 6 局）；每局你和对手 3 队<b>同序号捉对</b>（1v1、2v2、3v3），<span class="hi">≥2 队取胜才算赢下这一局</span>。</div>
+    <div class="row">🎯 <b>核心策略</b>（大神经验）：配队优先级 <b>「先保证2队完整 → 再保证3队完整 → 最后补2队强度」</b>。随机对局没信息 → <span class="ok">保 2 队强度最稳</span>；若你懂克制、能对位 → 也可三队均衡。</div>
+    <div class="row">⚙️ 战法 4 类型 <b>指挥/主动/追击/被动</b>；克制链：<span class="hi">技穷禁主动、缴械禁追击、震慑禁行动</span>。同队别全堆一种类型，容易被针对。</div>
   </div>
 
   <div class="tabs">
     <div class="tab on" data-tab="in">📝 录入卡池</div>
     <div class="tab" data-tab="out">🏆 三队方案</div>
+    <div class="tab" data-tab="ref">📚 资料库 / 体系参考</div>
   </div>
 
-  <!-- ============ INPUT PANE ============ -->
+  <!-- ===== INPUT ===== -->
   <div class="pane on" id="pane-in">
     <div class="sh"><span class="bar"></span>武将卡池<span class="cnt" id="gcnt">0 名</span>
       <span class="mini" onclick="toggleBulk('gbulk')">📋 批量粘贴</span></div>
     <div class="bulk" id="gbulk">
-      <textarea id="gbulkTa" placeholder="每行一名武将，用逗号或空格分隔：&#10;名字, 阵营(魏/蜀/吴/群), 兵种(步/骑/弓), 定位(输出/坦克/辅助/控制), 强度1-10&#10;例如：&#10;关羽,蜀,骑,输出,9&#10;张飞,蜀,步,坦克,8&#10;诸葛亮,蜀,弓,辅助,9"></textarea>
-      <div class="row">
-        <span class="tip">阵营填 魏/蜀/吴/群；兵种填 步/骑/弓；定位填 输出/坦克/辅助/控制。<b>同阵营3人+10%</b>。</span>
-        <button class="btn blue" onclick="parseGenerals()">导入武将</button>
-      </div>
+      <textarea id="gbulkTa" placeholder="每行一名武将（逗号/空格分隔）：名字, 阵营(魏/蜀/吴/群), 兵种(步/骑/弓), 定位(输出/坦克/辅助/控制), 强度1-10&#10;例：&#10;周瑜,吴,弓,输出,9&#10;大乔,吴,步,辅助,8&#10;张飞,蜀,步,坦克,8"></textarea>
+      <div class="row"><span class="tip">输入名字会自动带出资料库里的阵营/定位（可改）。定位：输出/坦克/辅助/控制。</span><button class="btn blue" onclick="parseGenerals()">导入武将</button></div>
     </div>
     <div class="list" id="glist"></div>
     <div class="addrow">
       <button class="btn ghost" onclick="addGeneral()">➕ 添加武将</button>
-      <button class="btn ghost" onclick="loadExample()">🎲 载入示例卡池</button>
+      <button class="btn ghost" onclick="loadExample()">🎲 载入真实示例池</button>
     </div>
 
-    <div class="sh" style="margin-top:30px"><span class="bar"></span>战法卡池<span class="cnt" id="tcnt">0 个</span>
+    <div class="sh" style="margin-top:26px"><span class="bar"></span>战法卡池<span class="cnt" id="tcnt">0 个</span>
       <span class="mini" onclick="toggleBulk('tbulk')">📋 批量粘贴</span></div>
     <div class="bulk" id="tbulk">
-      <textarea id="tbulkTa" placeholder="每行一个战法：&#10;名字, 类型(主动/被动/指挥/追击), 适配(输出/坦克/辅助/控制/通用), 强度1-10&#10;例如：&#10;横扫千军,主动,输出,8&#10;八门金锁,指挥,控制,8&#10;刮骨疗毒,主动,辅助,7"></textarea>
-      <div class="row">
-        <span class="tip">类型：主动/被动/指挥/追击；适配填该战法最适合的定位（通用=谁都能带）。</span>
-        <button class="btn blue" onclick="parseTactics()">导入战法</button>
-      </div>
+      <textarea id="tbulkTa" placeholder="每行一个战法：名字, 类型(指挥/主动/追击/被动), 特性(兵刃/谋略/治疗/防御/控制/辅助), 品质(橙/紫/蓝), 强度1-10&#10;例：&#10;水淹七军 主动 兵刃 橙 9&#10;揭竿而起 主动 兵刃 橙 7&#10;避其锐气 指挥 防御 紫 6"></textarea>
+      <div class="row"><span class="tip">类型：指挥/主动/追击/被动；特性：兵刃/谋略/治疗/防御/控制/辅助；品质：橙/紫/蓝。输入名字可自动带出。</span><button class="btn blue" onclick="parseTactics()">导入战法</button></div>
     </div>
     <div class="list" id="tlist"></div>
-    <div class="addrow">
-      <button class="btn ghost" onclick="addTactic()">➕ 添加战法</button>
+    <div class="addrow"><button class="btn ghost" onclick="addTactic()">➕ 添加战法</button></div>
+
+    <div class="sh" style="margin-top:26px"><span class="bar"></span>策略模式</div>
+    <div class="modes">
+      <div class="mode on" id="mode-dual" onclick="setMode('dual')">
+        <div class="mt">🐎 保双核（推荐·随机对局）</div>
+        <div class="md">集中资源造 2 支强队，保证「至少 2 队赢」拿小局。第 3 队吃余料当陪跑。适合积分赛随机匹配。</div>
+      </div>
+      <div class="mode" id="mode-balance" onclick="setMode('balance')">
+        <div class="mt">⚖️ 三队均衡</div>
+        <div class="md">三队战力拉平，每队都有输出+前排，容错高。适合你懂克制、深池能对位。</div>
+      </div>
+    </div>
+
+    <div class="sh" style="margin-top:22px"><span class="bar"></span>本期卡池相对全服水平<span style="font-size:11px;color:var(--sub);font-weight:500">（影响出线率估算）</span></div>
+    <div class="flevrow">
+      <span class="flev" data-v="weak" onclick="setFieldLevel('weak')">偏弱</span>
+      <span class="flev on" data-v="avg" onclick="setFieldLevel('avg')">平均水平</span>
+      <span class="flev" data-v="strong" onclick="setFieldLevel('strong')">偏强</span>
     </div>
 
     <div class="genbar">
@@ -173,95 +193,159 @@
     </div>
   </div>
 
-  <!-- ============ OUTPUT PANE ============ -->
+  <!-- ===== OUTPUT ===== -->
   <div class="pane" id="pane-out">
-    <div id="resultWrap"><div class="empty">还没有生成方案。切到「录入卡池」填写武将和战法后点「生成三队方案」。</div></div>
+    <div id="resultWrap"><div class="empty">还没有生成方案。填好卡池、选好策略模式后点「生成三队方案」。</div></div>
     <div class="genbar">
-      <button class="btn ghost" onclick="switchTab('in')">← 返回修改卡池</button>
+      <button class="btn ghost" onclick="switchTab('in')">← 返回修改</button>
       <span class="spacer"></span>
+      <button class="btn ghost" onclick="setMode(state.mode==='dual'?'balance':'dual');generate()">🔀 换个模式重算</button>
       <button class="btn primary" onclick="generate()">🔄 重新计算</button>
     </div>
   </div>
 
-  <div class="foot">数据仅保存在你的浏览器(localStorage) · 算法：均衡分配+定位互补+阵营缘分+战法匹配<br>卡池每期随机，请按当期实际武将战法录入</div>
+  <!-- ===== REFERENCE ===== -->
+  <div class="pane" id="pane-ref">
+    <div class="sh"><span class="bar"></span>强势体系 / 配队参考<span class="cnt">点「载入」填入卡池</span></div>
+    <div class="refgrid" id="refgrid"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="foot">数据仅存浏览器(localStorage) · 资料库整理自官方玩家攻略，仅供参考，版本变动以游戏内为准</div>
+  <div class="foot src">资料库来源：17173《三国谋定天下》官方专区玩家投稿（@三谋攻略君 / @三谋攻略详解站）· 演武大会玩法wiki</div>
 </div>
 
 <script>
-/* ================= 常量 & 数据 ================= */
-const ROLE_ICON={输出:'⚔️',坦克:'🛡️',辅助:'✨',控制:'🌀'};
+/* =========================================================
+   一、真实资料库（整理自 17173 三国谋定天下官方玩家攻略）
+   注意：阵营/定位/类型为攻略整理，可自行修改；强度分由你按当期环境判定
+   ========================================================= */
 const CAMPS=['魏','蜀','吴','群'];
 const TROOPS=['步','骑','弓'];
 const ROLES=['输出','坦克','辅助','控制'];
-const TTYPES=['主动','被动','指挥','追击'];
-const TFITS=['输出','坦克','辅助','控制','通用'];
+const DMG=['兵刃','谋略'];
+const TTYPES=['指挥','主动','追击','被动'];
+const TFEATS=['兵刃','谋略','治疗','防御','控制','辅助'];
+const QUALITY=['橙','紫','蓝'];
 const CAMP_COLOR={魏:'#5b8dff',蜀:'#e0524f',吴:'#3fbf9a',群:'#c9a227'};
 
-// 缘分羁绊（公开常识参考，命中即加成分；未列出的组合不影响）
-const BONDS=[
-  {name:'桃园结义',members:['刘备','关羽','张飞'],need:3,bonus:0.08},
-  {name:'五虎上将',members:['关羽','张飞','赵云','马超','黄忠'],need:3,bonus:0.06},
-  {name:'卧龙凤雏',members:['诸葛亮','庞统'],need:2,bonus:0.06},
-  {name:'五子良将',members:['张辽','乐进','于禁','张郃','徐晃'],need:3,bonus:0.05},
-  {name:'东吴四英',members:['周瑜','鲁肃','吕蒙','陆逊'],need:3,bonus:0.05},
-  {name:'江东双璧',members:['孙策','周瑜'],need:2,bonus:0.05},
-  {name:'大魏双雄',members:['曹操','司马懿'],need:2,bonus:0.05},
-  {name:'虎痴许褚',members:['许褚','典韦'],need:2,bonus:0.04},
+// 武将资料库：名字 → 阵营/定位/伤害类型(兵刃=武力/谋略=智力)/自带战法(已知的)
+const GEN_DB={
+  '周瑜':{camp:'吴',role:'输出',dmg:'谋略',auto:'临机制胜'},
+  '陆逊':{camp:'吴',role:'输出',dmg:'谋略'},
+  '大乔':{camp:'吴',role:'辅助',dmg:'谋略'},
+  '小乔':{camp:'吴',role:'控制',dmg:'谋略'},
+  '孙尚香':{camp:'吴',role:'输出',dmg:'兵刃'},
+  '鲁肃':{camp:'吴',role:'控制',dmg:'谋略'},
+  '太史慈':{camp:'吴',role:'输出',dmg:'兵刃'},
+  '甘宁':{camp:'吴',role:'输出',dmg:'兵刃'},
+  '吕蒙':{camp:'吴',role:'坦克',dmg:'兵刃'},
+  '刘备':{camp:'蜀',role:'辅助',dmg:'谋略'},
+  '关羽':{camp:'蜀',role:'输出',dmg:'兵刃'},
+  '张飞':{camp:'蜀',role:'坦克',dmg:'兵刃'},
+  '赵云':{camp:'蜀',role:'输出',dmg:'兵刃'},
+  '马超':{camp:'蜀',role:'输出',dmg:'兵刃'},
+  '诸葛亮':{camp:'蜀',role:'输出',dmg:'谋略'},
+  '姜维':{camp:'蜀',role:'输出',dmg:'兵刃'},
+  '黄月英':{camp:'蜀',role:'辅助',dmg:'谋略'},
+  '黄忠':{camp:'蜀',role:'输出',dmg:'兵刃'},
+  '孟获':{camp:'蜀',role:'坦克',dmg:'兵刃'},
+  '祝融':{camp:'蜀',role:'输出',dmg:'兵刃'},
+  '曹操':{camp:'魏',role:'坦克',dmg:'兵刃'},
+  '司马懿':{camp:'魏',role:'输出',dmg:'谋略'},
+  '郭嘉':{camp:'魏',role:'输出',dmg:'谋略'},
+  '张辽':{camp:'魏',role:'输出',dmg:'兵刃'},
+  '徐晃':{camp:'魏',role:'输出',dmg:'兵刃'},
+  '曹丕':{camp:'魏',role:'辅助',dmg:'谋略'},
+  '张春华':{camp:'魏',role:'控制',dmg:'谋略'},
+  '王异':{camp:'魏',role:'辅助',dmg:'谋略'},
+  '典韦':{camp:'魏',role:'输出',dmg:'兵刃'},
+  '夏侯惇':{camp:'魏',role:'坦克',dmg:'兵刃'},
+  '张郃':{camp:'魏',role:'输出',dmg:'兵刃'},
+  '董卓':{camp:'群',role:'坦克',dmg:'兵刃',auto:'权倾朝野'},
+  '吕布':{camp:'群',role:'输出',dmg:'兵刃'},
+  '贾诩':{camp:'群',role:'输出',dmg:'谋略'},
+  '庞德':{camp:'群',role:'输出',dmg:'兵刃',auto:'陷阵蹈难'},
+  '张宁':{camp:'群',role:'输出',dmg:'谋略'},
+  '甄姬':{camp:'群',role:'辅助',dmg:'谋略'},
+  '貂蝉':{camp:'群',role:'控制',dmg:'谋略'},
+  '皇甫嵩':{camp:'群',role:'坦克',dmg:'兵刃'},
+  '朱儁':{camp:'群',role:'输出',dmg:'谋略'},
+  '田丰':{camp:'群',role:'辅助',dmg:'谋略'},
+  '公孙瓒':{camp:'群',role:'输出',dmg:'兵刃'},
+  '袁绍':{camp:'群',role:'辅助',dmg:'谋略'},
+  '徐庶':{camp:'蜀',role:'输出',dmg:'谋略'},
+};
+
+// 战法资料库：名字 → 类型/特性/品质
+const TAC_DB={
+  '水淹七军':{type:'主动',feat:'控制',q:'橙'},
+  '揭竿而起':{type:'主动',feat:'兵刃',q:'橙'},
+  '战八方':{type:'主动',feat:'兵刃',q:'橙'},
+  '长驱直入':{type:'主动',feat:'兵刃',q:'橙'},
+  '攻其不备':{type:'追击',feat:'控制',q:'橙'},
+  '划湘分荆':{type:'主动',feat:'控制',q:'橙'},
+  '屈人之兵':{type:'主动',feat:'控制',q:'橙'},
+  '水淹八方':{type:'主动',feat:'控制',q:'橙'},
+  '决水':{type:'主动',feat:'谋略',q:'橙'},
+  '出其不意':{type:'主动',feat:'控制',q:'橙'},
+  '奇门':{type:'主动',feat:'谋略',q:'橙'},
+  '五雷正法':{type:'主动',feat:'谋略',q:'橙'},
+  '烈火':{type:'主动',feat:'谋略',q:'橙'},
+  '狂风':{type:'主动',feat:'谋略',q:'橙'},
+  '锐不可当':{type:'被动',feat:'兵刃',q:'橙'},
+  '横征暴敛':{type:'被动',feat:'控制',q:'橙'},
+  '忘私相助':{type:'被动',feat:'防御',q:'紫'},
+  '避其锐气':{type:'指挥',feat:'防御',q:'紫'},
+  '铸甲销戈':{type:'指挥',feat:'防御',q:'紫'},
+  '舍生取义':{type:'指挥',feat:'辅助',q:'紫'},
+  '以静制动':{type:'指挥',feat:'辅助',q:'紫'},
+  '如有神助':{type:'主动',feat:'辅助',q:'紫'},
+  '如沐春风':{type:'主动',feat:'治疗',q:'紫'},
+  '迎敌':{type:'指挥',feat:'防御',q:'紫'},
+  '骄勇之姿':{type:'被动',feat:'兵刃',q:'紫'},
+  '指点':{type:'指挥',feat:'治疗',q:'紫'},
+};
+
+// 强势体系/组合参考（真实演武攻略）
+const SYSTEMS=[
+  {tier:'T0',name:'周瑜·大都督核',core:'周瑜 + 大乔 + 控制位(小乔/陆逊)',note:'周瑜机制强，靠异常状态触发临机制胜爆输出；大乔带暴敛/以静，双弓双控压制。'},
+  {tier:'T0',name:'桃园队',core:'刘备 + 关羽 + 张飞',note:'阵营+羁绊双加成，刘备保生存即可，非常稳定的一队；技能别太抽象就行。'},
+  {tier:'T0',name:'诸葛·天水麒麟',core:'诸葛亮 + 马超 + 治疗位(黄月英)',note:'诸葛马超联动，注意伤害总和要够，别打不动。'},
+  {tier:'T0',name:'曹操·五雷郭嘉',core:'曹操 + 郭嘉 + 治疗/坦位',note:'郭嘉出其不意/奇门/五雷，单卡强度高，爆发足。'},
+  {tier:'T0',name:'汉盾体系',core:'皇甫嵩 + 朱儁 + 前排',note:'汉盾减伤体系，皇甫嵩一统加点，前排极硬。'},
+  {tier:'T1',name:'周瑜·贾诩',core:'周瑜 + 贾诩 + 坦位',note:'双谋略爆发，贾诩毒伤补控制。'},
+  {tier:'T1',name:'陆逊·火攻',core:'陆逊 + 稳定火(烈火/决水) + 坦/奶',note:'陆逊演武很强，靠持续火伤压制。'},
+  {tier:'T1',name:'五虎上将',core:'关羽/张飞/赵云/马超/黄忠 任选3',note:'羁绊暴击加成，注意战法冲突别重叠。'},
 ];
 
-let state={generals:[],tactics:[],result:null};
+/* =========================================================
+   二、状态 & 持久化
+   ========================================================= */
+let state={generals:[],tactics:[],result:null,mode:'dual',fieldLevel:'avg'};
 let uid=1; const nid=()=>'x'+(uid++);
+const KEY='sanguo_yanwu_v2';
+function save(){try{localStorage.setItem(KEY,JSON.stringify({generals:state.generals,tactics:state.tactics,mode:state.mode,fieldLevel:state.fieldLevel,uid}))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'null');if(d&&d.generals){state.generals=d.generals;state.tactics=d.tactics||[];state.mode=d.mode||'dual';state.fieldLevel=d.fieldLevel||'avg';uid=d.uid||100;}}catch(e){}}
 
-/* ================= 持久化 ================= */
-function save(){try{localStorage.setItem('sanguo_yanwu_v1',JSON.stringify({generals:state.generals,tactics:state.tactics,uid}))}catch(e){}}
-function load(){try{const d=JSON.parse(localStorage.getItem('sanguo_yanwu_v1')||'null');if(d&&d.generals){state.generals=d.generals;state.tactics=d.tactics||[];uid=d.uid||100;}}catch(e){}}
+/* =========================================================
+   三、录入 UI
+   ========================================================= */
+function opts(arr,cur){return arr.map(v=>`<option value="${v}"${v===cur?' selected':''}>${v}</option>`).join('');}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function qcls(q){return q==='橙'?'q-or':q==='紫'?'q-zi':'q-lan';}
 
-/* ================= 批量解析 ================= */
-function parseGenerals(){
-  const ta=document.getElementById('gbulkTa'); if(!ta.value.trim())return alert('请先粘贴内容');
-  let n=0;
-  ta.value.split(/\n/).forEach(line=>{
-    line=line.trim(); if(!line)return;
-    const p=line.split(/[,，\s]+/).filter(Boolean);
-    if(p.length<1)return;
-    const name=p[0];
-    let camp=CAMPS.find(c=>p.some(x=>x===c))||'群';
-    let troop=TROOPS.find(c=>p.some(x=>x===c))||'步';
-    let role=ROLES.find(c=>p.some(x=>x===c))||'输出';
-    let power=parseFloat(p.find(x=>/^\d+(\.\d+)?$/.test(x)&&+x<=10&&+x>=1))||6;
-    state.generals.push({id:nid(),name,camp,troop,role,power,support:false});n++;
-  });
-  ta.value='';toggleBulk('gbulk');renderGenerals();save();
-  if(n)alert('✅ 导入 '+n+' 名武将');
-}
-function parseTactics(){
-  const ta=document.getElementById('tbulkTa'); if(!ta.value.trim())return alert('请先粘贴内容');
-  let n=0;
-  ta.value.split(/\n/).forEach(line=>{
-    line=line.trim(); if(!line)return;
-    const p=line.split(/[,，\s]+/).filter(Boolean);
-    if(p.length<1)return;
-    const name=p[0];
-    let type=TTYPES.find(c=>p.some(x=>x===c))||'主动';
-    let fit=TFITS.find(c=>p.some(x=>x===c))||'通用';
-    let power=parseFloat(p.find(x=>/^\d+(\.\d+)?$/.test(x)&&+x<=10&&+x>=1))||6;
-    state.tactics.push({id:nid(),name,type,fit,power});n++;
-  });
-  ta.value='';toggleBulk('tbulk');renderTactics();save();
-  if(n)alert('✅ 导入 '+n+' 个战法');
-}
-function toggleBulk(id){document.getElementById(id).classList.toggle('on');}
-
-/* ================= 渲染录入 ================= */
 function renderGenerals(){
   const el=document.getElementById('glist');
   document.getElementById('gcnt').textContent=state.generals.length+' 名';
-  if(!state.generals.length){el.innerHTML='<div class="empty">还没有武将。点「批量粘贴」快速导入，或「添加武将」逐个加。</div>';return;}
+  if(!state.generals.length){el.innerHTML='<div class="empty">还没有武将。点「批量粘贴」快速导入，或「添加武将」。输入常见武将名会自动带出阵营/定位。</div>';return;}
   el.innerHTML=state.generals.map(g=>`
     <div class="erow" data-id="${g.id}">
-      <input value="${esc(g.name)}" placeholder="武将名" oninput="updG('${g.id}','name',this.value)">
+      <input value="${esc(g.name)}" placeholder="武将名" oninput="onGenName('${g.id}',this.value)">
       <select onchange="updG('${g.id}','camp',this.value)">${opts(CAMPS,g.camp)}</select>
       <select onchange="updG('${g.id}','troop',this.value)">${opts(TROOPS,g.troop)}</select>
       <select onchange="updG('${g.id}','role',this.value)">${opts(ROLES,g.role)}</select>
+      <select onchange="updG('${g.id}','dmg',this.value)" title="伤害类型">${opts(DMG,g.dmg||'兵刃')}</select>
       <div class="pw"><input type="range" min="1" max="10" step="0.5" value="${g.power}" oninput="updG('${g.id}','power',+this.value)"><span class="val">${g.power}</span></div>
       <button class="del" onclick="delG('${g.id}')">✕</button>
     </div>`).join('');
@@ -269,76 +353,97 @@ function renderGenerals(){
 function renderTactics(){
   const el=document.getElementById('tlist');
   document.getElementById('tcnt').textContent=state.tactics.length+' 个';
-  if(!state.tactics.length){el.innerHTML='<div class="empty">还没有战法。点「批量粘贴」快速导入，或「添加战法」逐个加。</div>';return;}
+  if(!state.tactics.length){el.innerHTML='<div class="empty">还没有战法。点「批量粘贴」快速导入，或「添加战法」。输入常见战法名会自动带出类型/特性/品质。</div>';return;}
   el.innerHTML=state.tactics.map(t=>`
     <div class="erow tac" data-id="${t.id}">
-      <input value="${esc(t.name)}" placeholder="战法名" oninput="updT('${t.id}','name',this.value)">
+      <input value="${esc(t.name)}" placeholder="战法名" oninput="onTacName('${t.id}',this.value)">
       <select onchange="updT('${t.id}','type',this.value)">${opts(TTYPES,t.type)}</select>
-      <select onchange="updT('${t.id}','fit',this.value)">${opts(TFITS,t.fit)}</select>
+      <select onchange="updT('${t.id}','feat',this.value)">${opts(TFEATS,t.feat)}</select>
+      <select onchange="updT('${t.id}','q',this.value)">${opts(QUALITY,t.q)}</select>
       <div class="pw"><input type="range" min="1" max="10" step="0.5" value="${t.power}" oninput="updT('${t.id}','power',+this.value)"><span class="val">${t.power}</span></div>
       <button class="del" onclick="delT('${t.id}')">✕</button>
     </div>`).join('');
 }
-function opts(arr,cur){return arr.map(v=>`<option value="${v}"${v===cur?' selected':''}>${v}</option>`).join('');}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-/* ================= 增删改 ================= */
-function addGeneral(){state.generals.push({id:nid(),name:'',camp:'群',troop:'步',role:'输出',power:6,support:false});renderGenerals();save();}
-function addTactic(){state.tactics.push({id:nid(),name:'',type:'主动',fit:'通用',power:6});renderTactics();save();}
+function onGenName(id,v){const g=state.generals.find(x=>x.id===id);if(!g)return;g.name=v;const db=GEN_DB[v.trim()];if(db){if(db.camp)g.camp=db.camp;if(db.role)g.role=db.role;if(db.dmg)g.dmg=db.dmg;renderGenerals();}save();}
+function onTacName(id,v){const t=state.tactics.find(x=>x.id===id);if(!t)return;t.name=v;const db=TAC_DB[v.trim()];if(db){t.type=db.type;t.feat=db.feat;t.q=db.q;renderTactics();}save();}
 function updG(id,k,v){const g=state.generals.find(x=>x.id===id);if(g){g[k]=v;if(k==='power'){const r=document.querySelector(`.erow[data-id="${id}"] .val`);if(r)r.textContent=v;}save();}}
 function updT(id,k,v){const t=state.tactics.find(x=>x.id===id);if(t){t[k]=v;if(k==='power'){const r=document.querySelector(`.erow[data-id="${id}"] .val`);if(r)r.textContent=v;}save();}}
+function addGeneral(){state.generals.push({id:nid(),name:'',camp:'群',troop:'步',role:'输出',dmg:'兵刃',power:6});renderGenerals();save();}
+function addTactic(){state.tactics.push({id:nid(),name:'',type:'主动',feat:'兵刃',q:'橙',power:6});renderTactics();save();}
 function delG(id){state.generals=state.generals.filter(x=>x.id!==id);renderGenerals();save();}
 function delT(id){state.tactics=state.tactics.filter(x=>x.id!==id);renderTactics();save();}
 function clearAll(){if(!confirm('确定清空所有武将和战法？'))return;state.generals=[];state.tactics=[];state.result=null;renderGenerals();renderTactics();save();switchTab('in');}
+function toggleBulk(id){document.getElementById(id).classList.toggle('on');}
 
-/* ================= 示例卡池 ================= */
-function loadExample(){
-  state.generals=[
-    {id:nid(),name:'关羽',camp:'蜀',troop:'骑',role:'输出',power:9,support:false},
-    {id:nid(),name:'张飞',camp:'蜀',troop:'步',role:'坦克',power:8,support:false},
-    {id:nid(),name:'刘备',camp:'蜀',troop:'弓',role:'辅助',power:7,support:false},
-    {id:nid(),name:'诸葛亮',camp:'蜀',troop:'弓',role:'辅助',power:9,support:false},
-    {id:nid(),name:'赵云',camp:'蜀',troop:'骑',role:'输出',power:8.5,support:false},
-    {id:nid(),name:'司马懿',camp:'魏',troop:'弓',role:'控制',power:9,support:false},
-    {id:nid(),name:'张辽',camp:'魏',troop:'骑',role:'输出',power:8,support:false},
-    {id:nid(),name:'曹操',camp:'魏',troop:'步',role:'坦克',power:8,support:false},
-    {id:nid(),name:'周瑜',camp:'吴',troop:'弓',role:'控制',power:8.5,support:false},
-    {id:nid(),name:'吕布',camp:'群',troop:'骑',role:'输出',power:9.5,support:false},
-  ];
-  state.tactics=[
-    {id:nid(),name:'横扫千军',type:'主动',fit:'输出',power:8},
-    {id:nid(),name:'一骑当千',type:'主动',fit:'输出',power:8},
-    {id:nid(),name:'所向披靡',type:'主动',fit:'输出',power:7},
-    {id:nid(),name:'破阵摧坚',type:'主动',fit:'输出',power:7},
-    {id:nid(),name:'轻勇飞燕',type:'追击',fit:'输出',power:7},
-    {id:nid(),name:'暴敛四方',type:'主动',fit:'输出',power:6},
-    {id:nid(),name:'万箭齐发',type:'主动',fit:'输出',power:7},
-    {id:nid(),name:'刮骨疗毒',type:'主动',fit:'辅助',power:7},
-    {id:nid(),name:'义心昭烈',type:'被动',fit:'辅助',power:7},
-    {id:nid(),name:'避实击虚',type:'被动',fit:'坦克',power:6},
-    {id:nid(),name:'藤甲兵',type:'被动',fit:'坦克',power:7},
-    {id:nid(),name:'暂避其锋',type:'指挥',fit:'坦克',power:6},
-    {id:nid(),name:'八门金锁阵',type:'指挥',fit:'控制',power:8},
-    {id:nid(),name:'沉沙决水',type:'主动',fit:'控制',power:7},
-    {id:nid(),name:'落凤',type:'主动',fit:'控制',power:7},
-    {id:nid(),name:'铁骑驱驰',type:'指挥',fit:'输出',power:6},
-    {id:nid(),name:'抚辑军民',type:'被动',fit:'辅助',power:6},
-    {id:nid(),name:'千里走单骑',type:'主动',fit:'输出',power:7},
-    {id:nid(),name:'长驱直入',type:'追击',fit:'输出',power:6},
-    {id:nid(),name:'锋矢阵',type:'指挥',fit:'通用',power:6},
-  ];
-  renderGenerals();renderTactics();save();
-  switchTab('in');
-  alert('🎲 已载入示例卡池（10 武将 / 20 战法）。可直接点「生成三队方案」体验。');
+function parseGenerals(){
+  const ta=document.getElementById('gbulkTa');if(!ta.value.trim())return alert('请先粘贴内容');
+  let n=0;
+  ta.value.split(/\n/).forEach(line=>{line=line.trim();if(!line)return;const p=line.split(/[,，\s]+/).filter(Boolean);if(!p.length)return;
+    const name=p[0];const db=GEN_DB[name]||{};
+    let camp=CAMPS.find(c=>p.some(x=>x===c))||db.camp||'群';
+    let troop=TROOPS.find(c=>p.some(x=>x===c))||'步';
+    let role=ROLES.find(c=>p.some(x=>x===c))||db.role||'输出';
+    let dmg=DMG.find(c=>p.some(x=>x===c))||db.dmg||'兵刃';
+    let power=parseFloat(p.find(x=>/^\d+(\.\d+)?$/.test(x)&&+x<=10&&+x>=1))||6;
+    state.generals.push({id:nid(),name,camp,troop,role,dmg,power});n++;});
+  ta.value='';toggleBulk('gbulk');renderGenerals();save();if(n)alert('✅ 导入 '+n+' 名武将');
+}
+function parseTactics(){
+  const ta=document.getElementById('tbulkTa');if(!ta.value.trim())return alert('请先粘贴内容');
+  let n=0;
+  ta.value.split(/\n/).forEach(line=>{line=line.trim();if(!line)return;const p=line.split(/[,，\s]+/).filter(Boolean);if(!p.length)return;
+    const name=p[0];const db=TAC_DB[name]||{};
+    let type=TTYPES.find(c=>p.some(x=>x===c))||db.type||'主动';
+    let feat=TFEATS.find(c=>p.some(x=>x===c))||db.feat||'兵刃';
+    let q=QUALITY.find(c=>p.some(x=>x===c))||db.q||'橙';
+    let power=parseFloat(p.find(x=>/^\d+(\.\d+)?$/.test(x)&&x!==q&&+x<=10&&+x>=1))||6;
+    state.tactics.push({id:nid(),name,type,feat,q,power});n++;});
+  ta.value='';toggleBulk('tbulk');renderTactics();save();if(n)alert('✅ 导入 '+n+' 个战法');
 }
 
-/* ================= 核心算法 ================= */
-const TEAM_CAP=3;          // 每队人数上限（演武为3人一队）
-const TAC_PER_GEN=2;       // 每名武将可学战法数
+/* =========================================================
+   四、真实示例卡池
+   ========================================================= */
+function loadExample(){
+  const G=(name,power)=>{const db=GEN_DB[name]||{};return {id:nid(),name,camp:db.camp||'群',troop:'步',role:db.role||'输出',dmg:db.dmg||'兵刃',power};};
+  const T=(name,power)=>{const db=TAC_DB[name]||{};return {id:nid(),name,type:db.type||'主动',feat:db.feat||'兵刃',q:db.q||'橙',power};};
+  state.generals=[
+    G('周瑜',9.5),G('大乔',8),G('小乔',7),        // 周瑜·大都督核（核心+配套）
+    G('刘备',6.5),G('关羽',8.5),G('张飞',8),       // 桃园（刘备保生存）
+    G('司马懿',9),G('郭嘉',8.5),G('张辽',7),      // 魏·谋略爆发
+    G('吕布',9),                                  // 群·单核
+  ];
+  state.generals[0].troop='弓';state.generals[1].troop='步';state.generals[2].troop='弓';
+  state.tactics=[
+    T('水淹七军',9),T('揭竿而起',7),T('长驱直入',7),T('战八方',7),
+    T('决水',8),T('出其不意',8),T('奇门',7),T('五雷正法',8),
+    T('烈火',7),T('狂风',6),T('攻其不备',7),T('横征暴敛',7),
+    T('避其锐气',6),T('铸甲销戈',6),T('舍生取义',6),T('以静制动',6),
+    T('如有神助',6),T('如沐春风',6),T('迎敌',5),T('锐不可当',6),
+  ];
+  renderGenerals();renderTactics();save();switchTab('in');
+  alert('🎲 已载入真实示例池（10 武将 / 20 战法，含周瑜大都督核+桃园+魏群）。可直接生成体验。');
+}
 
-// 评估一支队伍
+/* =========================================================
+   五、策略模式
+   ========================================================= */
+function setMode(m){state.mode=m;save();
+  document.getElementById('mode-dual').classList.toggle('on',m==='dual');
+  document.getElementById('mode-balance').classList.toggle('on',m==='balance');
+}
+
+/* =========================================================
+   六、核心算法
+   ========================================================= */
+const TEAM_CAP=3, TAC_PER_GEN=2, K_SCALE=2.2;
+
+// 战法特性 → 适配定位
+const FEAT_ROLE={'兵刃':'输出','谋略':'输出','治疗':'辅助','防御':'坦克','控制':'控制','辅助':'辅助'};
+
+// 队伍评估
 function evalTeam(team){
-  if(!team.length)return {score:0,base:0,campBonus:0,troopBonus:0,bondBonus:0,compBonus:0,bonds:[],notes:['空队'],roles:[]};
+  if(!team.length)return {score:0,base:0,campBonus:0,troopBonus:0,bondBonus:0,compBonus:0,bonds:[],notes:['空队'],roles:[],feats:[]};
   const base=team.reduce((s,g)=>s+(+g.power||0),0);
   const campCnt={},troopCnt={};
   team.forEach(g=>{campCnt[g.camp]=(campCnt[g.camp]||0)+1;troopCnt[g.troop]=(troopCnt[g.troop]||0)+1;});
@@ -346,10 +451,8 @@ function evalTeam(team){
   const maxTroop=Math.max(0,...Object.values(troopCnt));
   const campBonus=maxCamp>=3?0.10:maxCamp===2?0.04:0;
   const troopBonus=maxTroop>=3?0.06:maxTroop===2?0.02:0;
-  // 缘分
   let bondBonus=0,bonds=[];const names=team.map(g=>g.name);
   BONDS.forEach(b=>{const hit=b.members.filter(n=>names.includes(n)).length;if(hit>=b.need){bondBonus+=b.bonus;bonds.push(b.name);}});
-  // 定位互补
   const roles=[...new Set(team.map(g=>g.role))];
   let compBonus=0;const notes=[];
   if(roles.includes('坦克'))compBonus+=0.03; else notes.push('无前排承伤');
@@ -359,69 +462,106 @@ function evalTeam(team){
   return {score:base*mult,base,campBonus,troopBonus,bondBonus,compBonus,bonds,notes,roles,maxCamp,maxTroop};
 }
 
-// 代价：三队战力差(主) + 缺输出惩罚
+// 缘分（真实三国羁绊）
+const BONDS=[
+  {name:'桃园结义',members:['刘备','关羽','张飞'],need:3,bonus:0.08},
+  {name:'五虎上将',members:['关羽','张飞','赵云','马超','黄忠'],need:3,bonus:0.06},
+  {name:'卧龙凤雏',members:['诸葛亮','庞统'],need:2,bonus:0.06},
+  {name:'五子良将',members:['张辽','乐进','于禁','张郃','徐晃'],need:3,bonus:0.05},
+  {name:'东吴四英',members:['周瑜','鲁肃','吕蒙','陆逊'],need:3,bonus:0.05},
+  {name:'江东双璧',members:['孙策','周瑜'],need:2,bonus:0.05},
+  {name:'大魏双雄',members:['曹操','司马懿'],need:2,bonus:0.05},
+];
+
+// 代价函数：按模式
 function teamCost(teams){
   const sc=teams.map(t=>evalTeam(t).score);
-  const spread=Math.max(...sc)-Math.min(...sc);
+  const sorted=[...sc].sort((a,b)=>a-b);
   let rolePen=0;
-  teams.forEach(t=>{if(t.length&&!t.some(g=>g.role==='输出'))rolePen+=2.5;});
-  return spread+rolePen;
-}
-
-function generate(){
-  if(state.generals.length<3){alert('至少需要 3 名武将才能组队（建议 9 名以上组满三队）');switchTab('in');return;}
-  if(state.tactics.length<3){alert('至少需要 3 个战法（建议与本队武将数×2 相当）');switchTab('in');return;}
-  const teams=distribute(state.generals);
-  const assigned=assignTactics(teams,state.tactics);
-  state.result={teams,assigned,bench:teams.bench};
-  renderResult();
-  switchTab('out');
-}
-
-// 均衡分配到3队（贪心 + 局部搜索交换）
-function distribute(gens){
-  const G=[...gens];
-  const teams=[[],[],[]];
-  // 贪心：战力降序，放到当前综合分最低且未满的队
-  G.sort((a,b)=>(b.power||0)-(a.power||0));
-  const bench=[];
-  G.forEach(g=>{
-    const cand=[0,1,2].filter(t=>teams[t].length<TEAM_CAP);
-    if(!cand.length){bench.push(g);return;}
-    cand.sort((a,b)=>evalTeam(teams[a]).score-evalTeam(teams[b]).score);
-    teams[cand[0]].push(g);
+  teams.forEach(t=>{
+    if(!t.length)return;
+    const rs=t.map(g=>g.role);
+    if(!rs.includes('输出'))rolePen+=2.5;             // 缺输出：难全歼（最严重）
+    if(!rs.includes('坦克'))rolePen+=1.4;             // 无前排：站不住
+    if(!rs.includes('辅助')&&!rs.includes('控制'))rolePen+=0.7; // 无辅/控：缺续航与控制
   });
-  // 局部搜索：尝试任意两队间交换一名，若降低代价则接受
+  if(state.mode==='dual'){
+    const secondHighest=sorted[1];                 // 2nd best team strength = 双核核心
+    const lowest=sorted[0];
+    const avg=sc.reduce((a,b)=>a+b,0)/3;
+    const weakPen=Math.max(0,avg*0.78-lowest);      // 第三队别太废
+    return -secondHighest+weakPen*0.6+rolePen;
+  }else{
+    return (sorted[2]-sorted[0])+rolePen;           // 均衡：最小化极差
+  }
+}
+
+function distribute(gens){
+  const G=[...gens];G.sort((a,b)=>(b.power||0)-(a.power||0));
+  const teams=[[],[],[]];
+  if(state.mode==='dual'){
+    // 双核：最强6名轮流分入 A/B 两队，其余进 C
+    const AB=[[],[]];
+    for(const g of G){
+      if(AB[0].length<TEAM_CAP&&AB[0].length<=AB[1].length)AB[0].push(g);
+      else if(AB[1].length<TEAM_CAP)AB[1].push(g);
+      else break;
+    }
+    teams[0]=AB[0];teams[1]=AB[1];
+    const usedIds=new Set([...AB[0],...AB[1]].map(g=>g.id));
+    const rest=G.filter(g=>!usedIds.has(g.id));
+    const bench=[];
+    rest.forEach(g=>{ if(teams[2].length<TEAM_CAP)teams[2].push(g); else bench.push(g); });
+    teams.bench=bench;
+  }else{
+    const bench=[];
+    G.forEach(g=>{const cand=[0,1,2].filter(t=>teams[t].length<TEAM_CAP);
+      if(!cand.length){bench.push(g);return;}
+      cand.sort((a,b)=>evalTeam(teams[a]).score-evalTeam(teams[b]).score);
+      teams[cand[0]].push(g);});
+    teams.bench=bench;
+  }
+  // 局部搜索交换（队内保持人数）
   let best=teamCost(teams);
-  for(let iter=0;iter<800;iter++){
+  for(let iter=0;iter<900;iter++){
     let improved=false;
     outer:
-    for(let a=0;a<3;a++)for(let b=a+1;b<3;b++){
+    for(let a=0;a<3;a++)for(let b=a+1;b<3;b++)
       for(let i=0;i<teams[a].length;i++)for(let j=0;j<teams[b].length;j++){
         const t2=teams.map(t=>[...t]);
         const tmp=t2[a][i];t2[a][i]=t2[b][j];t2[b][j]=tmp;
         const c=teamCost(t2);
         if(c<best-1e-6){best=c;teams[a]=t2[a];teams[b]=t2[b];improved=true;break outer;}
       }
-    }
     if(!improved)break;
   }
-  teams.bench=bench;
   return teams;
 }
 
-// 战法分配：每将2个战法位，按适配度贪心匹配（战法不可重复使用）
+// 战法特性→武将 适配度（区分兵刃/谋略伤害类型）
+function featFit(feat,role,dmg){
+  if(role==='输出'){
+    if(feat===dmg)return 3.8;                 // 兵刃将带兵刃 / 谋略将带谋略 = 完美
+    if(feat==='兵刃'||feat==='谋略')return 0.6; // 反类型仍可但有损耗
+    if(feat==='控制')return 0.7;
+    if(feat==='辅助')return 0.4;
+    return 0.1;
+  }
+  if(role==='坦克'){if(feat==='防御')return 3.8;if(feat==='辅助')return 1.2;if(feat==='兵刃'||feat==='谋略')return 0.3;return 0.1;}
+  if(role==='辅助'){if(feat==='治疗'||feat==='辅助')return 3.8;if(feat==='防御')return 1.2;if(feat==='控制')return 0.8;return 0.2;}
+  if(role==='控制'){if(feat==='控制')return 3.8;if(feat==='谋略')return 1.0;if(feat==='辅助')return 0.8;return 0.2;}
+  return 0;
+}
+
 function assignTactics(teams,tactics){
   const onField=teams.flat();
   const slots={};onField.forEach(g=>slots[g.id]=[]);
   const used=new Set();
-  // 所有(武将,战法)配对打分
   const pairs=[];
   onField.forEach(g=>tactics.forEach(t=>{
-    let s=t.power;
-    if(t.fit===g.role)s+=3.5;
-    else if(t.fit==='通用')s+=1.2;
-    else s-=1.5;
+    let s=t.power+featFit(t.feat,g.role,g.dmg);
+    // 品质微调
+    if(t.q==='橙')s+=0.6;else if(t.q==='紫')s+=0.2;
     pairs.push({g,t,s});
   }));
   pairs.sort((a,b)=>b.s-a.s);
@@ -434,100 +574,164 @@ function assignTactics(teams,tactics){
   return {slots,unused};
 }
 
-/* ================= 结果渲染 ================= */
+/* =========================================================
+   七、胜率 & 出线概率估算
+   ========================================================= */
+function logistic(x){return 1/(1+Math.exp(-x));}
+function binomTail(n,k,p){ // P(X>=k), n=10
+  let s=0;
+  for(let i=k;i<=n;i++){ let c=1; for(let j=0;j<i;j++)c=c*(n-j)/(j+1); s+=c*Math.pow(p,i)*Math.pow(1-p,n-i); }
+  return s;
+}
+function estimateWin(scores){
+  const myAvg=scores.reduce((a,b)=>a+b,0)/3;
+  const factor=state.fieldLevel==='strong'?0.90:state.fieldLevel==='weak'?1.10:1.0; // 卡池强→对手相对弱
+  const oppAvg=myAvg*factor;
+  const pWin=scores.map(s=>logistic((s-oppAvg)/K_SCALE));
+  const [a,b,c]=pWin;
+  const pSmall=(a*b*c)+(a*b*(1-c))+(a*(1-b)*c)+((1-a)*b*c);
+  const pQualify=binomTail(10,6,pSmall);
+  return {pWin,pSmall,pQualify};
+}
+function setFieldLevel(v){state.fieldLevel=v;save();
+  document.querySelectorAll('.flev').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+}
+
+/* =========================================================
+   八、生成 & 渲染结果
+   ========================================================= */
+function generate(){
+  if(state.generals.length<3){alert('至少需要 3 名武将（建议 9 名以上组满三队）');switchTab('in');return;}
+  if(state.tactics.length<3){alert('至少需要 3 个战法（建议≥18 个让每将带满2个）');switchTab('in');return;}
+  const teams=distribute(state.generals);
+  const assigned=assignTactics(teams,state.tactics);
+  state.result={teams,assigned,bench:teams.bench};
+  renderResult();switchTab('out');
+}
+
 function renderResult(){
   const {teams,assigned,bench}=state.result;
   const evals=teams.map(t=>evalTeam(t));
   const scores=evals.map(e=>e.score);
-  const maxS=Math.max(...scores,1),minS=Math.min(...scores);
-  const spread=maxS-minS;
-  const total=scores.reduce((a,b)=>a+b,0);
+  const total=scores.reduce((a,b)=>a+b,0)||1;
   const tnames=['一队','二队','三队'];
   const tcolors=[CAMP_COLOR.蜀,CAMP_COLOR.魏,CAMP_COLOR.吴];
+  const est=estimateWin(scores);
+  const pct=x=>Math.round(x*100);
 
-  // 均衡度评价
-  const avg=total/3;
-  let balPct=Math.round(100*(1-spread/Math.max(avg,1)));
-  balPct=Math.max(0,Math.min(100,balPct));
-  let balWord,balClass;
-  if(spread/avg<=0.08){balWord='极均衡 · 稳健拿9分';balClass='ok';}
-  else if(spread/avg<=0.18){balWord='较均衡 · 大概率2:1以上';balClass='ok';}
-  else if(spread/avg<=0.30){balWord='略有落差 · 可再微调';balClass='';}
-  else{balWord='落差过大 · 易出现1:2';balClass='bad';}
+  // 角色分配标签（上/中/下等马）
+  const ranked=[...scores].map((s,i)=>({i,s})).sort((a,b)=>b.s-a.s);
+  const roleTag={};roleTag[ranked[0].i]='上等马·稳定';roleTag[ranked[1].i]='中等马·主力';roleTag[ranked[2].i]='下等马·拼爆发';
 
-  // 均衡条
   let balHTML=scores.map((s,i)=>{
     const w=(s/total*100).toFixed(1);
     return `<div class="seg" style="width:${w}%;background:${tcolors[i]}">${tnames[i]} ${s.toFixed(0)}</div>`;
   }).join('');
 
-  // 三队卡片
   const cards=teams.map((team,i)=>{
     const ev=evals[i];
     const gensHTML=team.map(g=>{
       const tacs=assigned.slots[g.id]||[];
       const tacsHTML=tacs.length?tacs.map(t=>{
-        const cls=t.fit===g.role?'match':(t.fit==='通用'?'':'miss');
-        return `<span class="tac ${cls}">${esc(t.name)}<span class="tt">${t.fit}</span></span>`;
-      }).join(''):`<span class="tac none">（无战法）</span>`;
-      return `<div class="gen">
-        <div class="ghead">
-          <span class="gname">${ROLE_ICON[g.role]||''} ${esc(g.name)||'未命名'}</span>
-          <span class="chip camp" style="color:${CAMP_COLOR[g.camp]||'#8a97b0'}">${g.camp}</span>
-          <span class="chip troop">${g.troop}兵</span>
-          <span class="chip role">${g.role}</span>
-          <span class="gpw">${(+g.power).toFixed(1)}</span>
-        </div>
-        <div class="tacs">${tacsHTML}</div>
-      </div>`;
+        const fit=featFit(t.feat,g.role,g.dmg);
+        const cls=fit>=2.5?'match':(fit>=1.0?'':'miss');
+        return `<span class="tac ${cls}"><span class="${qcls(t.q)}">${esc(t.name)}</span><span class="tt">${t.type}·${t.feat}</span></span>`;
+      }).join(''):`<span class="tac none">（无战法·建议补）</span>`;
+      return `<div class="gen"><div class="ghead">
+        <span class="gname">${esc(g.name)||'未命名'}</span>
+        <span class="chip camp" style="color:${CAMP_COLOR[g.camp]||'#8a97b0'}">${g.camp}</span>
+        <span class="chip troop">${g.troop}</span><span class="chip role">${g.role}·${g.dmg||''}</span>
+        <span class="gpw">${(+g.power).toFixed(1)}</span></div>
+        <div class="tacs">${tacsHTML}</div></div>`;
     }).join('');
-    // 评价
+
+    // 战法类型分布检查
+    const types={};team.forEach(g=>(assigned.slots[g.id]||[]).forEach(t=>types[t.type]=(types[t.type]||0)+1));
+    const totalT=Object.values(types).reduce((a,b)=>a+b,0)||1;
+    const activeRatio=(types['主动']||0)/totalT;
+    const chaseRatio=(types['追击']||0)/totalT;
+    let tnote='';
+    if(activeRatio>=0.7)tnote='⚠️主动战法过多，怕技穷';
+    else if(chaseRatio>=0.7)tnote='⚠️追击战法过多，怕缴械';
+
     let good=[];
-    if(ev.maxCamp>=3)good.push('同阵营3人 +10%');
-    else if(ev.maxCamp===2)good.push('同阵营2人 +4%');
-    if(ev.maxTroop>=3)good.push('同兵种 +6%');
-    else if(ev.maxTroop===2)good.push('同兵种2人 +2%');
+    if(ev.maxCamp>=3)good.push('同阵营3人+10%');else if(ev.maxCamp===2)good.push('同阵营2人+4%');
+    if(ev.maxTroop>=3)good.push('同兵种+6%');else if(ev.maxTroop===2)good.push('同兵种2人+2%');
     if(ev.bonds.length)good.push('缘分:'+ev.bonds.join('/'));
     if(ev.roles.includes('输出')&&ev.roles.includes('坦克'))good.push('攻守兼备');
-    const bad=ev.notes;
+    const bad=[...ev.notes];if(tnote)bad.push(tnote);
+    const emptySlot=team.some(g=>(assigned.slots[g.id]||[]).length<TAC_PER_GEN);
+    if(emptySlot)bad.push('有武将战法未带满');
+
     const footHTML=`<div>${good.length?'<span class="ok">✔ '+good.join(' · ')+'</span>':'<span style="color:#8a97b0">无额外加成</span>'}</div>`
       +(bad.length?`<div class="bad" style="margin-top:3px">✖ ${bad.join(' · ')}</div>`:'');
 
     return `<div class="tcard">
-      <div class="thead">
-        <span class="tname" style="color:${tcolors[i]}">${tnames[i]}</span>
-        <span class="tscore">${ev.score.toFixed(1)}<small>综合战力</small></span>
-      </div>
-      <div class="tbody">${gensHTML||'<div class="empty" style="padding:14px">空</div>'}</div>
-      <div class="tfoot">${footHTML}</div>
-    </div>`;
+      <div class="thead"><span class="tname" style="color:${tcolors[i]}">${tnames[i]}</span>
+        <span class="trole">${roleTag[i]}</span>
+        <span class="tscore">${ev.score.toFixed(1)}<small>战力分</small></span></div>
+      <div class="tbody">${gensHTML}</div><div class="tfoot">${footHTML}</div></div>`;
   }).join('');
 
-  // 策略结论
+  // 结论
+  const sorted=[...scores].sort((a,b)=>b-a);
   let verdict='';
-  const strongest=scores.indexOf(maxS),weakest=scores.indexOf(minS);
-  if(spread/avg<=0.18){
-    verdict=`三队战力接近（最大差 <b>${spread.toFixed(1)}</b>），配置<b>均衡稳健</b>，对手无论怎么对位都难打出 3:0，你至少能稳拿 <b>9 分档</b>。`;
+  if(state.mode==='dual'){
+    verdict=`双核模式：二强队战力 <b>${sorted[0].toFixed(0)} / ${sorted[1].toFixed(0)}</b>，第三队 ${sorted[2].toFixed(0)} 陪跑。目标——每局<b>至少 2 队取胜</b>拿下小局，靠这两队稳定吃分。`;
   }else{
-    verdict=`三队落差偏大（${tnames[strongest]} ${maxS.toFixed(0)} vs ${tnames[weakest]} ${minS.toFixed(0)}），存在被 <span class="warn">1:2</span> 只拿1分的风险。建议把${tnames[strongest]}的强度向${tnames[weakest]}匀一点——但演武里武将已固定，可考虑给弱队多配主力战法。`;
+    verdict=`三队均衡：极差 <b>${(sorted[0]-sorted[2]).toFixed(1)}</b>。容错高，但每局需临场2队发挥，适合会看克制对位的打法。`;
   }
 
   const benchHTML=(bench&&bench.length)?`<div class="bench"><b>替补（未上场 ${bench.length} 名）：</b><br>`+bench.map(g=>`<span class="bchip">${esc(g.name)} ${g.camp}·${g.troop}·${g.role} <b style="color:#e6b34a">${(+g.power).toFixed(1)}</b></span>`).join('')+`</div>`:'';
-  const unusedHTML=(assigned.unused&&assigned.unused.length)?`<div class="bench"><b>未用战法 ${assigned.unused.length} 个：</b><br>`+assigned.unused.map(t=>`<span class="bchip">${esc(t.name)} ${t.fit}</span>`).join('')+`</div>`:'';
+  const unusedHTML=(assigned.unused&&assigned.unused.length)?`<div class="bench"><b>未用战法 ${assigned.unused.length} 个：</b><br>`+assigned.unused.map(t=>`<span class="bchip"><span class="${qcls(t.q)}">${esc(t.name)}</span> ${t.type}·${t.feat}</span>`).join('')+`</div>`:'';
 
   document.getElementById('resultWrap').innerHTML=`
     <div class="sum">
-      <h3>📊 三队均衡度：<span style="color:${balClass==='bad'?'#e0524f':'#3fbf9a'}">${balPct}分 · ${balWord}</span></h3>
+      <h3>📊 方案概览 <span style="font-size:11px;color:var(--sub);font-weight:600">（${state.mode==='dual'?'🐎 保双核':'⚖️ 三队均衡'}）</span></h3>
       <div class="balance">${balHTML}</div>
+      <div class="statrow">
+        <div class="stat"><div class="sv">${pct(est.pSmall)}%</div><div class="sl">单局(3v3)胜率估算</div></div>
+        <div class="stat"><div class="sv" style="color:${est.pQualify>=0.5?'#3fbf9a':'#e6b34a'}">${pct(est.pQualify)}%</div><div class="sl">小组赛出线率(6/10)</div></div>
+        <div class="stat"><div class="sv">${sorted[0].toFixed(0)}<span style="font-size:12px;color:var(--sub)">/${sorted[2].toFixed(0)}</span></div><div class="sl">最强/最弱队战力</div></div>
+      </div>
       <div class="note">${verdict}</div>
+      <div class="note" style="margin-top:6px;color:#8794ac;font-size:11.5px">※ 胜率为基于「你的卡池水平(${state.fieldLevel==='strong'?'偏强':state.fieldLevel==='weak'?'偏弱':'平均'})」建模的粗略估算，仅供相对参考，非实际预测。</div>
     </div>
     <div class="teams">${cards}</div>
-    ${benchHTML}
-    ${unusedHTML}
+    ${benchHTML}${unusedHTML}
   `;
 }
 
-/* ================= Tab ================= */
+/* =========================================================
+   九、资料库渲染
+   ========================================================= */
+function renderRef(){
+  document.getElementById('refgrid').innerHTML=SYSTEMS.map(s=>`
+    <div class="refcard">
+      <div class="rt"><span class="tier">${s.tier}</span>${esc(s.name)}</div>
+      <div class="rm"><b>核心：</b>${esc(s.core)}<br>${esc(s.note)}</div>
+      <div class="load" onclick='loadSystem(${JSON.stringify(s.core)})'>➕ 载入到卡池 →</div>
+    </div>`).join('');
+  document.getElementById('legend').innerHTML=`
+    <b>📖 战法类型与克制</b><br>
+    · <span class="k">指挥</span>：最先发动、不怕控制（被震慑也能放），但武将阵亡后失效。<br>
+    · <span class="k">主动</span>：行动后普攻前按概率发动；<b>被【技穷】直接禁用</b>，怕高速控制。<br>
+    · <span class="k">追击</span>：普攻后按概率发动；<b>被【缴械】禁用</b>，怕鲁肃类克制。<br>
+    · <span class="k">被动</span>：强化自身，触发条件各异；同样怕特定状态。<br>
+    <b>💡 组队铁律</b>：别全堆一种类型（否则被针对）；保证每个武将都带满 2 个战法（"三个臭皮匠顶个诸葛亮，一神拖二坑很容易输"）；伤害总和要够（武队输出别低于约3万）；前排要站得住，不硬就上双前排/减伤。<br>
+    <b>🎯 演武选将</b>：尽量往体系凑，同类型武将别太多（已2个追击就别再选追击）；看阵营+羁绊加成；输出武将区分「单核」还是「辅助型输出」。
+  `;
+}
+function loadSystem(coreStr){
+  const names=(coreStr.match(/[\u4e00-\u9fa5]{2,4}/g)||[]).filter(n=>GEN_DB[n]);
+  if(!names.length){alert('该系统核心武将未收录到资料库，请手动添加');return;}
+  names.forEach(n=>{if(!state.generals.some(g=>g.name===n)){const db=GEN_DB[n];state.generals.push({id:nid(),name:n,camp:db.camp,troop:'步',role:db.role,dmg:db.dmg||'兵刃',power:8});}});
+  renderGenerals();save();alert('✅ 已载入：'+names.join('、')+'（请到「录入卡池」调整兵种/强度）');
+}
+
+/* =========================================================
+   十、Tab / 启动
+   ========================================================= */
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
@@ -536,8 +740,10 @@ function switchTab(t){
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
 
-/* ================= 启动 ================= */
-load();renderGenerals();renderTactics();
+load();
+setMode(state.mode);
+setFieldLevel(state.fieldLevel);
+renderGenerals();renderTactics();renderRef();
 </script>
 </body>
 </html>
