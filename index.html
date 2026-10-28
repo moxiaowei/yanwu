@@ -129,7 +129,7 @@
 <div class="wrap">
   <header>
     <div class="title">⚔️ 演武大会 · 三队方案生成器</div>
-    <div class="subtitle">《三国谋定天下》· S17 赛季 · 输入本期武将 & 战法卡池 → 生成均衡/双核三队方案 + 出线概率估算</div>
+    <div class="subtitle">《三国谋定天下》· S17 赛季 · 输入本期武将 & 战法卡池 → 生成均衡/双核三队方案 + 出线概率 + 淘汰赛田忌赛马对位</div>
   </header>
 
   <div class="insight">
@@ -141,6 +141,7 @@
   <div class="tabs">
     <div class="tab on" data-tab="in">📝 录入卡池</div>
     <div class="tab" data-tab="out">🏆 三队方案</div>
+    <div class="tab" data-tab="ko">🎯 淘汰赛·田忌赛马</div>
     <div class="tab" data-tab="ref">📚 资料库 / 体系参考</div>
   </div>
 
@@ -204,6 +205,16 @@
     </div>
   </div>
 
+  <!-- ===== KNOCKOUT / 田忌赛马 ===== -->
+  <div class="pane" id="pane-ko">
+    <div class="sh"><span class="bar"></span>淘汰赛对位 · 田忌赛马</div>
+    <div class="insight" style="max-width:none;margin:0 0 16px">
+      <div class="row">🐎 <b>田忌赛马</b>：淘汰赛若能自选对位（你的哪队打对手哪队），核心——用<b>下等马撞对手上等马</b>（弃 1 局），再用<b>上等马/中等马稳稳赢下另外两局</b>，凑出 <span class="ok">2:1 赢下淘汰赛</span>。</div>
+      <div class="row">📝 填好双方 3 队战力（可从「三队方案」自动带入），算法会枚举 6 种对位，找出「赢 2 局概率最大」的排法。</div>
+    </div>
+    <div id="koBody"></div>
+  </div>
+
   <!-- ===== REFERENCE ===== -->
   <div class="pane" id="pane-ref">
     <div class="sh"><span class="bar"></span>强势体系 / 配队参考<span class="cnt">点「载入」填入卡池</span></div>
@@ -212,7 +223,7 @@
   </div>
 
   <div class="foot">数据仅存浏览器(localStorage) · 资料库整理自官方玩家攻略，仅供参考，版本变动以游戏内为准</div>
-  <div class="foot src">资料库来源：sgmdtx.com《三国谋定天下》资料站（武将/战法权威数据，含赛季标注）· 17173 演武大会玩家攻略 · 本页为 S17 赛季整理，仅供参考，以游戏内为准</div>
+  <div class="foot src">资料库来源：sgmdtx.com《三国谋定天下》资料站（已全量收录 <b>106 名武将 / 230 个战法</b>，含阵营·兵种·自带战法·赛季标注）· 17173 演武大会玩家攻略（八大主流强队等）· 本页为 S17 赛季整理，仅供配队参考，以游戏内为准</div>
 </div>
 
 <script>
@@ -231,149 +242,375 @@ const CAMP_COLOR={魏:'#5b8dff',蜀:'#e0524f',吴:'#3fbf9a',群:'#c9a227'};
 
 // 资料库（权威数据源：sgmdtx.com《三国谋定天下》资料站，标注赛季见游戏；仅供参考，可自行修正）
 const GEN_DB={
-  "皇甫嵩":{camp:"群",troop:"骑",role:"输出",dmg:"谋略",auto:"平乱定叛"},
-  "朱儁":{camp:"群",troop:"弓",role:"输出",dmg:"谋略",auto:"围师必阙"},
-  "董卓":{camp:"群",troop:"盾",role:"坦克",dmg:"兵刃",auto:"权倾朝野"},
-  "祝融夫人":{camp:"群",troop:"骑",role:"输出",dmg:"兵刃",auto:"南疆烈刃"},
-  "诸葛亮":{camp:"蜀",troop:"盾",role:"输出",dmg:"谋略",auto:"草船借箭"},
-  "孟获":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"雄护南疆"},
-  "木鹿大王":{camp:"群",troop:"骑",role:"辅助",dmg:"兵刃",auto:"驱兽御象"},
-  "姜维":{camp:"蜀",troop:"枪",role:"输出",dmg:"文武",auto:"九伐中原"},
-  "王异":{camp:"魏",troop:"枪",role:"输出",dmg:"谋略",auto:"巧策引锋"},
-  "左慈":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"云行雨施"},
-  "张宁":{camp:"群",troop:"弓",role:"输出",dmg:"谋略",auto:"太平余响"},
-  "张角":{camp:"群",troop:"盾",role:"输出",dmg:"谋略",auto:"黄天当立"},
-  "蔡文姬":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"悲愤诗"},
-  "步练师":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"淑懿之德"},
-  "田丰":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"荐计阻敌"},
-  "张昭":{camp:"吴",troop:"弓",role:"辅助",dmg:"兵刃",auto:"直谏固政"},
-  "陆逊":{camp:"吴",troop:"盾",role:"输出",dmg:"谋略",auto:"火烧连营"},
-  "孙权":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"虎踞江东"},
-  "鲁肃":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"划湘分荆"},
-  "小乔":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"天香"},
-  "黄盖":{camp:"吴",troop:"盾",role:"坦克",dmg:"兵刃",auto:"苦肉计"},
-  "徐盛":{camp:"魏",troop:"盾",role:"坦克",dmg:"兵刃",auto:"百里疑城"},
-  "吕蒙":{camp:"吴",troop:"盾",role:"输出",dmg:"谋略",auto:"白衣渡江"},
-  "曹操":{camp:"魏",troop:"盾",role:"坦克",dmg:"兵刃",auto:"乱世奸雄"},
-  "刘备":{camp:"蜀",troop:"盾",role:"辅助",dmg:"兵刃",auto:"携民渡江"},
-  "关羽":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"威震华夏"},
-  "张飞":{camp:"蜀",troop:"盾",role:"辅助",dmg:"兵刃",auto:"万人之敌"},
-  "赵云":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"七进七出"},
-  "马超":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"纵马横枪"},
-  "黄忠":{camp:"蜀",troop:"盾",role:"输出",dmg:"兵刃",auto:"定军扬威"},
-  "吕布":{camp:"群",troop:"盾",role:"输出",dmg:"兵刃",auto:"骁勇无前"},
-  "貂蝉":{camp:"群",troop:"盾",role:"坦克",dmg:"兵刃",auto:"闭月"},
-  "司马懿":{camp:"魏",troop:"盾",role:"输出",dmg:"谋略",auto:"鹰视狼顾"},
-  "郭嘉":{camp:"魏",troop:"盾",role:"输出",dmg:"谋略",auto:"算无遗策"},
-  "张辽":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"风袭逍遥"},
-  "徐晃":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"长驱直入"},
-  "曹丕":{camp:"魏",troop:"弓",role:"辅助",dmg:"兵刃",auto:"权御九锡"},
-  "张春华":{camp:"魏",troop:"盾",role:"辅助",dmg:"兵刃",auto:"荼蘼心计"},
-  "典韦":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"古之恶来"},
-  "夏侯惇":{camp:"魏",troop:"盾",role:"坦克",dmg:"兵刃",auto:"刚烈"},
-  "张郃":{camp:"魏",troop:"盾",role:"输出",dmg:"兵刃",auto:"大破街亭"},
-  "贾诩":{camp:"魏",troop:"盾",role:"辅助",dmg:"谋略",auto:"诡道玄机"},
-  "庞德":{camp:"群",troop:"盾",role:"输出",dmg:"兵刃",auto:"陷阵蹈难"},
-  "袁绍":{camp:"群",troop:"盾",role:"辅助",dmg:"兵刃",auto:"合聚群雄"},
-  "公孙瓒":{camp:"群",troop:"盾",role:"输出",dmg:"文武",auto:"威震塞外"},
-  "太史慈":{camp:"吴",troop:"盾",role:"输出",dmg:"兵刃",auto:"弦无虚发"},
-  "甘宁":{camp:"吴",troop:"盾",role:"输出",dmg:"兵刃",auto:"锦帆渠魁"},
-  "孙尚香":{camp:"吴",troop:"盾",role:"输出",dmg:"兵刃",auto:"弓腰姬"},
-  "周瑜":{camp:"吴",troop:"盾",role:"输出",dmg:"谋略",auto:"临机制胜"},
-  "大乔":{camp:"吴",troop:"盾",role:"辅助",dmg:"兵刃",auto:"国色"},
-  "黄月英":{camp:"蜀",troop:"盾",role:"辅助",dmg:"兵刃",auto:"木牛流马"},
-  "马腾":{camp:"群",troop:"骑",role:"辅助",dmg:"兵刃",auto:"雄踞西凉"}
+"丁奉":{"camp":"魏","troop":"盾","role":"坦克","dmg":"谋略","auto":"奋勇当先"},
+"乐进":{"camp":"魏","troop":"盾","role":"辅助","dmg":"兵刃","auto":"每战先登"},
+"于吉":{"camp":"群","troop":"弓","role":"辅助","dmg":"谋略","auto":"风急雨晦"},
+"于禁":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"持军毅重"},
+"公孙瓒":{"camp":"群","troop":"盾","role":"输出","dmg":"文武","auto":"威震塞外"},
+"关平":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"龙吟四海"},
+"关羽":{"camp":"蜀","troop":"盾","role":"输出","dmg":"兵刃","auto":"威震华夏"},
+"关银屏":{"camp":"蜀","troop":"骑","role":"辅助","dmg":"兵刃","auto":"虎啸生威"},
+"典韦":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"古之恶来"},
+"凌统":{"camp":"吴","troop":"骑","role":"输出","dmg":"兵刃","auto":"旋略勇进"},
+"刘备":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"谋略","auto":"携民渡江"},
+"华佗":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"麻沸散"},
+"华雄":{"camp":"群","troop":"盾","role":"输出","dmg":"兵刃","auto":"耀武扬威"},
+"卞夫人":{"camp":"魏","troop":"弓","role":"辅助","dmg":"谋略","auto":"素衣约俭"},
+"司马懿":{"camp":"魏","troop":"盾","role":"输出","dmg":"谋略","auto":"鹰视狼顾"},
+"吕布":{"camp":"群","troop":"盾","role":"输出","dmg":"兵刃","auto":"骁勇无前"},
+"吕蒙":{"camp":"吴","troop":"盾","role":"输出","dmg":"谋略","auto":"白衣渡江"},
+"周仓":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"忠烈勇武"},
+"周泰":{"camp":"吴","troop":"盾","role":"坦克","dmg":"兵刃","auto":"不屈意志"},
+"周瑜":{"camp":"吴","troop":"盾","role":"输出","dmg":"谋略","auto":"临机制胜"},
+"夏侯惇":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"刚烈"},
+"夏侯渊":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"神速奔袭"},
+"大乔":{"camp":"吴","troop":"盾","role":"辅助","dmg":"谋略","auto":"国色"},
+"太史慈":{"camp":"吴","troop":"盾","role":"输出","dmg":"兵刃","auto":"弦无虚发"},
+"姜维":{"camp":"蜀","troop":"枪","role":"输出","dmg":"文武","auto":"九伐中原"},
+"孙坚":{"camp":"吴","troop":"盾","role":"坦克","dmg":"兵刃","auto":"武烈破虏"},
+"孙坚2":{"camp":"吴","troop":"盾","role":"输出","dmg":"兵刃","auto":"诛凶殄逆"},
+"孙尚香":{"camp":"吴","troop":"盾","role":"输出","dmg":"兵刃","auto":"弓腰姬"},
+"孙权":{"camp":"吴","troop":"盾","role":"辅助","dmg":"谋略","auto":"虎踞江东"},
+"孙策":{"camp":"吴","troop":"盾","role":"输出","dmg":"兵刃","auto":"制霸江东"},
+"孟获":{"camp":"群","troop":"盾","role":"辅助","dmg":"兵刃","auto":"雄护南疆"},
+"小乔":{"camp":"吴","troop":"盾","role":"辅助","dmg":"谋略","auto":"天香"},
+"左慈":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"云行雨施"},
+"庞德":{"camp":"群","troop":"盾","role":"输出","dmg":"兵刃","auto":"陷阵蹈难"},
+"庞统":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"谋略","auto":"连环计"},
+"张宁":{"camp":"群","troop":"弓","role":"输出","dmg":"谋略","auto":"太平余响"},
+"张宝":{"camp":"群","troop":"盾","role":"输出","dmg":"谋略","auto":"妖风大作"},
+"张春华":{"camp":"魏","troop":"盾","role":"辅助","dmg":"谋略","auto":"荼蘼心计"},
+"张昭":{"camp":"吴","troop":"弓","role":"辅助","dmg":"谋略","auto":"直谏固政"},
+"张曼成":{"camp":"群","troop":"盾","role":"坦克","dmg":"兵刃","auto":"神上使"},
+"张梁":{"camp":"群","troop":"盾","role":"输出","dmg":"兵刃","auto":"妖武"},
+"张角":{"camp":"群","troop":"盾","role":"输出","dmg":"谋略","auto":"黄天当立"},
+"张辽":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"风袭逍遥"},
+"张郃":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"大破街亭"},
+"张飞":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"兵刃","auto":"万人之敌"},
+"徐庶":{"camp":"蜀","troop":"盾","role":"输出","dmg":"文武","auto":"折节学问"},
+"徐晃":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"长驱直入"},
+"徐盛":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"百里疑城"},
+"文丑":{"camp":"群","troop":"盾","role":"输出","dmg":"兵刃","auto":"交锋震威"},
+"曹丕":{"camp":"魏","troop":"弓","role":"辅助","dmg":"谋略","auto":"权御九锡"},
+"曹仁":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"固镇襄樊"},
+"曹操":{"camp":"魏","troop":"盾","role":"坦克","dmg":"谋略","auto":"乱世奸雄"},
+"曹洪":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"八虎雄首"},
+"曹真":{"camp":"魏","troop":"盾","role":"坦克","dmg":"谋略","auto":"渊然难测"},
+"曹纯":{"camp":"魏","troop":"骑","role":"辅助","dmg":"兵刃","auto":"天下骁锐"},
+"木鹿大王":{"camp":"群","troop":"骑","role":"辅助","dmg":"谋略","auto":"驱兽御象"},
+"朱儁":{"camp":"群","troop":"弓","role":"输出","dmg":"谋略","auto":"围师必阙"},
+"李儒":{"camp":"群","troop":"盾","role":"输出","dmg":"谋略","auto":"鸩饮毒弑"},
+"步练师":{"camp":"吴","troop":"盾","role":"辅助","dmg":"谋略","auto":"淑懿之德"},
+"法正":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"谋略","auto":"睹事知机"},
+"潘璋":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"驰军截刃"},
+"王双":{"camp":"魏","troop":"骑","role":"输出","dmg":"兵刃","auto":"恃勇克敌"},
+"王异":{"camp":"魏","troop":"枪","role":"输出","dmg":"谋略","auto":"巧策引锋"},
+"甄洛":{"camp":"魏","troop":"盾","role":"辅助","dmg":"谋略","auto":"流风回雪"},
+"甘夫人":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"谋略","auto":"皇思淑仁"},
+"甘宁":{"camp":"吴","troop":"盾","role":"输出","dmg":"兵刃","auto":"锦帆渠魁"},
+"田丰":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"荐计阻敌"},
+"皇甫嵩":{"camp":"群","troop":"骑","role":"输出","dmg":"谋略","auto":"平乱定叛"},
+"皇甫嵩2":{"camp":"群","troop":"盾","role":"坦克","dmg":"兵刃","auto":"兵动若神"},
+"祝融夫人":{"camp":"群","troop":"骑","role":"输出","dmg":"兵刃","auto":"南疆烈刃"},
+"程昱":{"camp":"魏","troop":"盾","role":"输出","dmg":"谋略","auto":"勇冠贲育"},
+"程普":{"camp":"吴","troop":"盾","role":"坦克","dmg":"谋略","auto":"兴王定霸"},
+"荀彧":{"camp":"魏","troop":"盾","role":"辅助","dmg":"谋略","auto":"建计举人"},
+"荀攸":{"camp":"魏","troop":"弓","role":"输出","dmg":"谋略","auto":"十二奇策"},
+"董卓":{"camp":"群","troop":"盾","role":"坦克","dmg":"文武","auto":"权倾朝野"},
+"董袭":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"飞身断虹"},
+"蒋钦":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"武略江洪"},
+"蔡文姬":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"悲愤诗"},
+"袁术":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"僭号天子"},
+"袁绍":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"合聚群雄"},
+"许褚":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"裸衣血战"},
+"诸葛亮":{"camp":"蜀","troop":"盾","role":"输出","dmg":"谋略","auto":"草船借箭"},
+"诸葛亮2":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"谋略","auto":"星罗棋布"},
+"诸葛瑾":{"camp":"吴","troop":"弓","role":"辅助","dmg":"谋略","auto":"慎思笃行"},
+"貂蝉":{"camp":"群","troop":"盾","role":"坦克","dmg":"谋略","auto":"闭月"},
+"贾诩":{"camp":"魏","troop":"盾","role":"辅助","dmg":"谋略","auto":"诡道玄机"},
+"赵云":{"camp":"蜀","troop":"盾","role":"输出","dmg":"兵刃","auto":"七进七出"},
+"邓艾":{"camp":"魏","troop":"盾","role":"辅助","dmg":"谋略","auto":"屯田令"},
+"邹氏":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"顾盼生姿"},
+"郝昭":{"camp":"魏","troop":"盾","role":"辅助","dmg":"谋略","auto":"千机重城"},
+"郭嘉":{"camp":"魏","troop":"盾","role":"输出","dmg":"谋略","auto":"算无遗策"},
+"陆抗":{"camp":"吴","troop":"弓","role":"辅助","dmg":"谋略","auto":"决堰倾涛"},
+"陆逊":{"camp":"吴","troop":"盾","role":"输出","dmg":"谋略","auto":"火烧连营"},
+"陈宫":{"camp":"群","troop":"盾","role":"辅助","dmg":"谋略","auto":"智令从计"},
+"陈武":{"camp":"魏","troop":"盾","role":"坦克","dmg":"兵刃","auto":"悍战无畏"},
+"韩当":{"camp":"魏","troop":"盾","role":"输出","dmg":"兵刃","auto":"猿臂善射"},
+"颜良":{"camp":"群","troop":"盾","role":"输出","dmg":"兵刃","auto":"膂力过人"},
+"马云禄":{"camp":"蜀","troop":"盾","role":"输出","dmg":"兵刃","auto":"红妆缭乱"},
+"马腾":{"camp":"群","troop":"骑","role":"辅助","dmg":"兵刃","auto":"雄踞西凉"},
+"马超":{"camp":"蜀","troop":"盾","role":"输出","dmg":"兵刃","auto":"纵马横枪"},
+"高顺":{"camp":"群","troop":"盾","role":"辅助","dmg":"兵刃","auto":"誓死无退"},
+"魏延":{"camp":"蜀","troop":"盾","role":"输出","dmg":"兵刃","auto":"子午奇谋"},
+"鲁肃":{"camp":"吴","troop":"盾","role":"辅助","dmg":"谋略","auto":"划湘分荆"},
+"黄忠":{"camp":"蜀","troop":"盾","role":"输出","dmg":"兵刃","auto":"定军扬威"},
+"黄月英":{"camp":"蜀","troop":"盾","role":"辅助","dmg":"谋略","auto":"木牛流马"},
+"黄盖":{"camp":"吴","troop":"盾","role":"坦克","dmg":"谋略","auto":"苦肉计"}
 };
 
 const TAC_DB={
-  "胜敌益强":{type:"被动",feat:"文武",q:"橙"},
-  "锐不可当":{type:"被动",feat:"辅助",q:"橙"},
-  "折冲御侮":{type:"指挥",feat:"防御",q:"橙"},
-  "调和阴阳":{type:"指挥",feat:"防御",q:"橙"},
-  "指点乾坤":{type:"主动",feat:"文武",q:"橙"},
-  "践墨随敌":{type:"被动",feat:"防御",q:"橙"},
-  "九伐中原":{type:"指挥",feat:"文武",q:"橙"},
-  "百战不殆":{type:"指挥",feat:"辅助",q:"橙"},
-  "惩前毖后":{type:"指挥",feat:"谋略",q:"橙"},
-  "云行雨施":{type:"指挥",feat:"辅助",q:"橙"},
-  "烈火张天":{type:"主动",feat:"文武",q:"橙"},
-  "知人善任":{type:"主动",feat:"防御",q:"橙"},
-  "明其虚实":{type:"主动",feat:"谋略",q:"橙"},
-  "韬光养晦":{type:"被动",feat:"谋略",q:"橙"},
-  "断戈夺锋":{type:"主动",feat:"兵刃",q:"橙"},
-  "水淹七军":{type:"主动",feat:"兵刃",q:"橙"},
-  "揭竿而起":{type:"主动",feat:"兵刃",q:"紫"},
-  "战八方":{type:"主动",feat:"兵刃",q:"橙"},
-  "长驱直入":{type:"主动",feat:"兵刃",q:"橙"},
-  "出其不意":{type:"主动",feat:"谋略",q:"橙"},
-  "奇门遁甲":{type:"主动",feat:"谋略",q:"橙"},
-  "权倾朝野":{type:"指挥",feat:"文武",q:"橙"},
-  "围师必阙":{type:"主动",feat:"谋略",q:"橙"},
-  "火烧连营":{type:"主动",feat:"谋略",q:"橙"},
-  "草船借箭":{type:"指挥",feat:"谋略",q:"橙"},
-  "巧策引锋":{type:"被动",feat:"谋略",q:"橙"},
-  "太平余响":{type:"指挥",feat:"谋略",q:"橙"},
-  "鹰视狼顾":{type:"主动",feat:"谋略",q:"橙"},
-  "算无遗策":{type:"指挥",feat:"谋略",q:"橙"},
-  "风袭逍遥":{type:"被动",feat:"辅助",q:"橙"},
-  "骁勇无前":{type:"主动",feat:"兵刃",q:"橙"},
-  "七进七出":{type:"被动",feat:"兵刃",q:"橙"},
-  "纵马横枪":{type:"被动",feat:"兵刃",q:"橙"},
-  "万人之敌":{type:"主动",feat:"兵刃",q:"橙"},
-  "威震华夏":{type:"主动",feat:"兵刃",q:"橙"},
-  "定军扬威":{type:"追击",feat:"兵刃",q:"橙"},
-  "闭月":{type:"被动",feat:"防御",q:"橙"},
-  "苦肉计":{type:"主动",feat:"防御",q:"橙"},
-  "百里疑城":{type:"指挥",feat:"防御",q:"橙"},
-  "白衣渡江":{type:"主动",feat:"谋略",q:"橙"},
-  "乱世奸雄":{type:"指挥",feat:"辅助",q:"橙"},
-  "携民渡江":{type:"指挥",feat:"治疗",q:"橙"},
-  "天香":{type:"主动",feat:"治疗",q:"橙"},
-  "虎踞江东":{type:"指挥",feat:"辅助",q:"橙"},
-  "划湘分荆":{type:"主动",feat:"防御",q:"橙"},
-  "国色":{type:"指挥",feat:"辅助",q:"橙"},
-  "木牛流马":{type:"指挥",feat:"辅助",q:"橙"},
-  "悲愤诗":{type:"主动",feat:"治疗",q:"橙"},
-  "淑懿之德":{type:"主动",feat:"辅助",q:"橙"},
-  "荐计阻敌":{type:"主动",feat:"辅助",q:"橙"},
-  "直谏固政":{type:"主动",feat:"治疗",q:"橙"},
-  "平乱定叛":{type:"指挥",feat:"防御",q:"橙"},
-  "权御九锡":{type:"指挥",feat:"辅助",q:"橙"},
-  "荼蘼心计":{type:"指挥",feat:"辅助",q:"橙"},
-  "古之恶来":{type:"被动",feat:"兵刃",q:"橙"},
-  "刚烈":{type:"被动",feat:"兵刃",q:"橙"},
-  "大破街亭":{type:"主动",feat:"兵刃",q:"橙"},
-  "诡道玄机":{type:"指挥",feat:"谋略",q:"橙"},
-  "陷阵蹈难":{type:"被动",feat:"兵刃",q:"橙"},
-  "合聚群雄":{type:"指挥",feat:"辅助",q:"橙"},
-  "威震塞外":{type:"追击",feat:"文武",q:"橙"},
-  "弦无虚发":{type:"被动",feat:"兵刃",q:"橙"},
-  "锦帆渠魁":{type:"被动",feat:"兵刃",q:"橙"},
-  "弓腰姬":{type:"追击",feat:"兵刃",q:"橙"},
-  "驱兽御象":{type:"指挥",feat:"谋略",q:"橙"},
-  "雄护南疆":{type:"指挥",feat:"辅助",q:"橙"},
-  "临机制胜":{type:"指挥",feat:"谋略",q:"橙"},
-  "黄天当立":{type:"主动",feat:"谋略",q:"橙"},
-  "避其锐气":{type:"指挥",feat:"防御",q:"紫"},
-  "铸甲销戈":{type:"指挥",feat:"防御",q:"紫"},
-  "舍生取义":{type:"指挥",feat:"辅助",q:"橙"},
-  "横征暴敛":{type:"被动",feat:"防御",q:"橙"}
+"一计决胜":{"type":"主动","feat":"谋略","q":"紫"},
+"七进七出":{"type":"被动","feat":"兵刃","q":"橙"},
+"万人之敌":{"type":"主动","feat":"兵刃","q":"橙"},
+"万军辟易":{"type":"追击","feat":"兵刃","q":"橙"},
+"万夫莫当":{"type":"被动","feat":"兵刃","q":"橙"},
+"三军夺气":{"type":"追击","feat":"辅助","q":"橙"},
+"上兵伐谋":{"type":"指挥","feat":"谋略","q":"紫"},
+"上智为间":{"type":"主动","feat":"谋略","q":"橙"},
+"不屈意志":{"type":"被动","feat":"防御","q":"橙"},
+"临危勇烈":{"type":"被动","feat":"兵刃","q":"紫"},
+"临机制胜":{"type":"指挥","feat":"谋略","q":"橙"},
+"临阵突袭":{"type":"追击","feat":"兵刃","q":"紫"},
+"乘虚而入":{"type":"追击","feat":"兵刃","q":"橙"},
+"乘间投隙":{"type":"追击","feat":"谋略","q":"橙"},
+"九伐中原":{"type":"指挥","feat":"文武","q":"橙"},
+"乱世奸雄":{"type":"指挥","feat":"辅助","q":"橙"},
+"乱敌方阵":{"type":"追击","feat":"兵刃","q":"紫"},
+"云行雨施":{"type":"指挥","feat":"辅助","q":"橙"},
+"五雷轰顶":{"type":"主动","feat":"谋略","q":"橙"},
+"交锋震威":{"type":"追击","feat":"兵刃","q":"橙"},
+"以战养战":{"type":"被动","feat":"治疗","q":"紫"},
+"以静制动":{"type":"被动","feat":"防御","q":"橙"},
+"任人唯贤":{"type":"主动","feat":"辅助","q":"紫"},
+"任人择势":{"type":"指挥","feat":"辅助","q":"橙"},
+"伏兵四起":{"type":"主动","feat":"兵刃","q":"橙"},
+"僭号天子":{"type":"指挥","feat":"辅助","q":"橙"},
+"克敌如风":{"type":"主动","feat":"兵刃","q":"紫"},
+"八虎雄首":{"type":"主动","feat":"兵刃","q":"紫"},
+"兴王定霸":{"type":"指挥","feat":"辅助","q":"橙"},
+"兵动若神":{"type":"指挥","feat":"防御","q":"橙"},
+"兵贵神速":{"type":"追击","feat":"兵刃","q":"橙"},
+"冲锐巧变":{"type":"主动","feat":"兵刃","q":"橙"},
+"决堰倾涛":{"type":"指挥","feat":"辅助","q":"橙"},
+"决水破敌":{"type":"主动","feat":"谋略","q":"紫"},
+"出其不意":{"type":"主动","feat":"谋略","q":"橙"},
+"划湘分荆":{"type":"主动","feat":"防御","q":"橙"},
+"刚烈":{"type":"被动","feat":"兵刃","q":"橙"},
+"制霸江东":{"type":"主动","feat":"兵刃","q":"橙"},
+"势如破竹":{"type":"主动","feat":"兵刃","q":"橙"},
+"勇冠三军":{"type":"被动","feat":"兵刃","q":"橙"},
+"勇冠贲育":{"type":"主动","feat":"谋略","q":"橙"},
+"十二奇策":{"type":"主动","feat":"谋略","q":"橙"},
+"十面埋伏":{"type":"主动","feat":"兵刃","q":"橙"},
+"千机重城":{"type":"指挥","feat":"辅助","q":"橙"},
+"千里突袭":{"type":"追击","feat":"兵刃","q":"橙"},
+"南疆烈刃":{"type":"被动","feat":"兵刃","q":"橙"},
+"及锋而试":{"type":"主动","feat":"兵刃","q":"橙"},
+"古之恶来":{"type":"被动","feat":"兵刃","q":"橙"},
+"合聚群雄":{"type":"指挥","feat":"辅助","q":"橙"},
+"同舟共济":{"type":"指挥","feat":"治疗","q":"橙"},
+"咏歌尝酒":{"type":"主动","feat":"治疗","q":"紫"},
+"围师必阙":{"type":"主动","feat":"谋略","q":"橙"},
+"固若金汤":{"type":"指挥","feat":"防御","q":"橙"},
+"固镇襄樊":{"type":"指挥","feat":"防御","q":"橙"},
+"国色":{"type":"指挥","feat":"辅助","q":"橙"},
+"坚壁清野":{"type":"主动","feat":"防御","q":"紫"},
+"坚如磐石":{"type":"主动","feat":"防御","q":"橙"},
+"夜袭":{"type":"追击","feat":"兵刃","q":"紫"},
+"大破街亭":{"type":"主动","feat":"兵刃","q":"橙"},
+"天下骁锐":{"type":"指挥","feat":"辅助","q":"橙"},
+"天香":{"type":"主动","feat":"治疗","q":"橙"},
+"太平余响":{"type":"指挥","feat":"谋略","q":"橙"},
+"奇正相生":{"type":"指挥","feat":"治疗","q":"橙"},
+"奇计迭出":{"type":"追击","feat":"谋略","q":"紫"},
+"奇门遁甲":{"type":"主动","feat":"谋略","q":"橙"},
+"奋勇当先":{"type":"追击","feat":"兵刃","q":"紫"},
+"如有神助":{"type":"被动","feat":"辅助","q":"紫"},
+"如沐春风":{"type":"被动","feat":"治疗","q":"紫"},
+"妖武":{"type":"主动","feat":"兵刃","q":"橙"},
+"妖风大作":{"type":"主动","feat":"谋略","q":"橙"},
+"威名显赫":{"type":"主动","feat":"兵刃","q":"橙"},
+"威震华夏":{"type":"主动","feat":"兵刃","q":"橙"},
+"威震塞外":{"type":"追击","feat":"文武","q":"橙"},
+"子午奇谋":{"type":"指挥","feat":"兵刃","q":"橙"},
+"定军扬威":{"type":"追击","feat":"兵刃","q":"橙"},
+"屈人之兵":{"type":"主动","feat":"防御","q":"紫"},
+"屯田令":{"type":"指挥","feat":"治疗","q":"橙"},
+"岿然不动":{"type":"指挥","feat":"防御","q":"橙"},
+"巧利天灾":{"type":"主动","feat":"谋略","q":"橙"},
+"巧策引锋":{"type":"被动","feat":"谋略","q":"橙"},
+"平乱定叛":{"type":"指挥","feat":"防御","q":"橙"},
+"建计举人":{"type":"指挥","feat":"辅助","q":"橙"},
+"弓腰姬":{"type":"追击","feat":"兵刃","q":"橙"},
+"强袭":{"type":"被动","feat":"兵刃","q":"紫"},
+"御敌临前":{"type":"主动","feat":"防御","q":"橙"},
+"忘私相助":{"type":"被动","feat":"治疗","q":"橙"},
+"忠烈勇武":{"type":"被动","feat":"防御","q":"橙"},
+"恃勇克敌":{"type":"追击","feat":"兵刃","q":"橙"},
+"恩威并行":{"type":"指挥","feat":"防御","q":"橙"},
+"悍战无畏":{"type":"主动","feat":"兵刃","q":"紫"},
+"悲愤诗":{"type":"主动","feat":"治疗","q":"橙"},
+"惩前毖后":{"type":"指挥","feat":"谋略","q":"橙"},
+"慎思笃行":{"type":"指挥","feat":"谋略","q":"橙"},
+"战八方":{"type":"主动","feat":"兵刃","q":"橙"},
+"折冲御侮":{"type":"指挥","feat":"防御","q":"橙"},
+"折节学问":{"type":"主动","feat":"文武","q":"橙"},
+"披坚执锐":{"type":"指挥","feat":"辅助","q":"橙"},
+"持军毅重":{"type":"被动","feat":"防御","q":"橙"},
+"指点乾坤":{"type":"主动","feat":"文武","q":"橙"},
+"挫锐折锋":{"type":"指挥","feat":"辅助","q":"橙"},
+"掠阵破军":{"type":"被动","feat":"文武","q":"橙"},
+"揭竿而起":{"type":"主动","feat":"兵刃","q":"紫"},
+"携民渡江":{"type":"指挥","feat":"治疗","q":"橙"},
+"摧坚克难":{"type":"被动","feat":"兵刃","q":"橙"},
+"攻其不备":{"type":"追击","feat":"兵刃","q":"橙"},
+"文武双全":{"type":"主动","feat":"文武","q":"橙"},
+"文治武功":{"type":"指挥","feat":"文武","q":"紫"},
+"文韬武略":{"type":"追击","feat":"文武","q":"橙"},
+"料事如神":{"type":"主动","feat":"谋略","q":"橙"},
+"斩将夺旗":{"type":"主动","feat":"兵刃","q":"橙"},
+"断戈夺锋":{"type":"主动","feat":"兵刃","q":"橙"},
+"断敌粮道":{"type":"指挥","feat":"谋略","q":"橙"},
+"旋略勇进":{"type":"追击","feat":"兵刃","q":"橙"},
+"无难之志":{"type":"主动","feat":"辅助","q":"橙"},
+"明其虚实":{"type":"主动","feat":"谋略","q":"橙"},
+"星罗棋布":{"type":"指挥","feat":"辅助","q":"橙"},
+"智令从计":{"type":"指挥","feat":"辅助","q":"橙"},
+"智破千军":{"type":"追击","feat":"谋略","q":"橙"},
+"木牛流马":{"type":"指挥","feat":"辅助","q":"橙"},
+"未雨绸缪":{"type":"主动","feat":"谋略","q":"橙"},
+"机变无穷":{"type":"被动","feat":"谋略","q":"橙"},
+"权倾朝野":{"type":"指挥","feat":"文武","q":"橙"},
+"权御九锡":{"type":"指挥","feat":"辅助","q":"橙"},
+"束手无策":{"type":"主动","feat":"谋略","q":"紫"},
+"来好息师":{"type":"被动","feat":"治疗","q":"紫"},
+"横征暴敛":{"type":"被动","feat":"防御","q":"橙"},
+"横扫千军":{"type":"追击","feat":"兵刃","q":"橙"},
+"步步为营":{"type":"指挥","feat":"防御","q":"橙"},
+"武烈破虏":{"type":"主动","feat":"兵刃","q":"橙"},
+"武略江洪":{"type":"主动","feat":"文武","q":"紫"},
+"每战先登":{"type":"指挥","feat":"辅助","q":"橙"},
+"水淹七军":{"type":"主动","feat":"兵刃","q":"橙"},
+"洗筋伐髓":{"type":"被动","feat":"辅助","q":"橙"},
+"洞若观火":{"type":"主动","feat":"治疗","q":"橙"},
+"流风回雪":{"type":"指挥","feat":"辅助","q":"橙"},
+"淑懿之德":{"type":"主动","feat":"辅助","q":"橙"},
+"清风驱疾":{"type":"主动","feat":"治疗","q":"橙"},
+"渊然难测":{"type":"指挥","feat":"防御","q":"紫"},
+"潜龙在渊":{"type":"指挥","feat":"文武","q":"橙"},
+"火烧连营":{"type":"主动","feat":"谋略","q":"橙"},
+"火羽":{"type":"主动","feat":"兵刃","q":"紫"},
+"烈火张天":{"type":"主动","feat":"文武","q":"橙"},
+"烈火焚营":{"type":"主动","feat":"谋略","q":"橙"},
+"狂风大作":{"type":"指挥","feat":"谋略","q":"橙"},
+"猿臂善射":{"type":"被动","feat":"兵刃","q":"紫"},
+"王佐之才":{"type":"被动","feat":"辅助","q":"橙"},
+"疾行侧击":{"type":"主动","feat":"兵刃","q":"紫"},
+"白衣渡江":{"type":"主动","feat":"谋略","q":"橙"},
+"百战不殆":{"type":"指挥","feat":"辅助","q":"橙"},
+"百里疑城":{"type":"指挥","feat":"防御","q":"橙"},
+"皇思淑仁":{"type":"指挥","feat":"辅助","q":"橙"},
+"直谏固政":{"type":"主动","feat":"治疗","q":"橙"},
+"睹事知机":{"type":"主动","feat":"谋略","q":"橙"},
+"睿虑合图":{"type":"指挥","feat":"辅助","q":"橙"},
+"瞋目横矛":{"type":"指挥","feat":"辅助","q":"橙"},
+"知人善任":{"type":"主动","feat":"防御","q":"橙"},
+"破军袭敌":{"type":"主动","feat":"兵刃","q":"橙"},
+"破阵驰围":{"type":"主动","feat":"兵刃","q":"橙"},
+"神上使":{"type":"被动","feat":"防御","q":"紫"},
+"神略制变":{"type":"主动","feat":"谋略","q":"橙"},
+"神速奔袭":{"type":"被动","feat":"兵刃","q":"橙"},
+"穷追不舍":{"type":"被动","feat":"兵刃","q":"紫"},
+"空城计":{"type":"指挥","feat":"辅助","q":"橙"},
+"筹划良策":{"type":"主动","feat":"谋略","q":"紫"},
+"算无遗策":{"type":"指挥","feat":"谋略","q":"橙"},
+"素衣约俭":{"type":"指挥","feat":"辅助","q":"橙"},
+"红妆缭乱":{"type":"追击","feat":"兵刃","q":"橙"},
+"纵马横枪":{"type":"被动","feat":"兵刃","q":"橙"},
+"经天纬地":{"type":"主动","feat":"谋略","q":"橙"},
+"缮甲厉兵":{"type":"被动","feat":"兵刃","q":"橙"},
+"耀武扬威":{"type":"主动","feat":"兵刃","q":"橙"},
+"胜敌益强":{"type":"被动","feat":"文武","q":"橙"},
+"膂力过人":{"type":"追击","feat":"兵刃","q":"橙"},
+"舍生取义":{"type":"指挥","feat":"辅助","q":"橙"},
+"苦肉计":{"type":"主动","feat":"防御","q":"橙"},
+"草船借箭":{"type":"指挥","feat":"谋略","q":"橙"},
+"荐计阻敌":{"type":"主动","feat":"辅助","q":"橙"},
+"荼蘼心计":{"type":"指挥","feat":"辅助","q":"橙"},
+"蓄势待发":{"type":"指挥","feat":"辅助","q":"橙"},
+"虎啸生威":{"type":"被动","feat":"兵刃","q":"橙"},
+"虎步连环":{"type":"追击","feat":"兵刃","q":"橙"},
+"虎踞江东":{"type":"指挥","feat":"辅助","q":"橙"},
+"裸衣血战":{"type":"被动","feat":"兵刃","q":"橙"},
+"誓死无退":{"type":"指挥","feat":"辅助","q":"橙"},
+"计袭粮仓":{"type":"追击","feat":"谋略","q":"橙"},
+"计逐穷寇":{"type":"被动","feat":"谋略","q":"紫"},
+"诛凶殄逆":{"type":"主动","feat":"兵刃","q":"橙"},
+"诡道玄机":{"type":"指挥","feat":"谋略","q":"橙"},
+"诱敌深入":{"type":"主动","feat":"防御","q":"橙"},
+"调和阴阳":{"type":"指挥","feat":"防御","q":"橙"},
+"谈笑诛心":{"type":"被动","feat":"谋略","q":"紫"},
+"谋而后动":{"type":"追击","feat":"谋略","q":"橙"},
+"趁火打劫":{"type":"主动","feat":"文武","q":"橙"},
+"践墨随敌":{"type":"被动","feat":"防御","q":"橙"},
+"蹈锋饮血":{"type":"被动","feat":"兵刃","q":"橙"},
+"轻装驰援":{"type":"追击","feat":"防御","q":"橙"},
+"辕门射戟":{"type":"追击","feat":"兵刃","q":"橙"},
+"迎敌":{"type":"主动","feat":"兵刃","q":"紫"},
+"运智铺谋":{"type":"被动","feat":"辅助","q":"橙"},
+"运筹帷幄":{"type":"主动","feat":"辅助","q":"橙"},
+"连环计":{"type":"指挥","feat":"辅助","q":"橙"},
+"避其锐气":{"type":"指挥","feat":"防御","q":"紫"},
+"金城汤池":{"type":"指挥","feat":"防御","q":"橙"},
+"铁骑横冲":{"type":"追击","feat":"兵刃","q":"橙"},
+"铸甲销戈":{"type":"指挥","feat":"防御","q":"紫"},
+"锐不可当":{"type":"被动","feat":"辅助","q":"橙"},
+"锦帆渠魁":{"type":"被动","feat":"兵刃","q":"橙"},
+"长驱直入":{"type":"主动","feat":"兵刃","q":"橙"},
+"闭月":{"type":"被动","feat":"防御","q":"橙"},
+"陷阵蹈难":{"type":"被动","feat":"兵刃","q":"橙"},
+"雄护南疆":{"type":"指挥","feat":"辅助","q":"橙"},
+"雄踞西凉":{"type":"指挥","feat":"辅助","q":"橙"},
+"青囊急救":{"type":"主动","feat":"治疗","q":"橙"},
+"韬光养晦":{"type":"被动","feat":"谋略","q":"橙"},
+"顾盼生姿":{"type":"被动","feat":"辅助","q":"橙"},
+"风助火势":{"type":"主动","feat":"文武","q":"橙"},
+"风卷残云":{"type":"主动","feat":"兵刃","q":"橙"},
+"风急雨晦":{"type":"主动","feat":"谋略","q":"橙"},
+"风袭逍遥":{"type":"被动","feat":"辅助","q":"橙"},
+"飞身断虹":{"type":"被动","feat":"防御","q":"紫"},
+"驰军截刃":{"type":"被动","feat":"兵刃","q":"紫"},
+"驱兽御象":{"type":"指挥","feat":"谋略","q":"橙"},
+"骁勇之姿":{"type":"被动","feat":"辅助","q":"紫"},
+"骁勇无前":{"type":"主动","feat":"兵刃","q":"橙"},
+"鸩饮毒弑":{"type":"主动","feat":"谋略","q":"橙"},
+"鹰视狼顾":{"type":"主动","feat":"谋略","q":"橙"},
+"麻沸散":{"type":"指挥","feat":"辅助","q":"橙"},
+"黄天当立":{"type":"主动","feat":"谋略","q":"橙"},
+"黄天惑心":{"type":"主动","feat":"谋略","q":"橙"},
+"龙吟四海":{"type":"被动","feat":"兵刃","q":"橙"}
 };
 
 // 强势体系/组合参考（真实演武攻略）
 const SYSTEMS=[
-  {tier:'T0',name:'大汉盾体系',core:'皇甫嵩 + 朱儁 + 卢植/汉盾前排',
-   note:'皇甫嵩靠「百战不殆」狂叠统率(中后期全队统率600+)，坦度拉满、自带战法4000-7000爆发；朱儁触发「汉末栋梁」羁绊减伤。克兵刃体系(赵甘姜几乎打不动)，怕陆逊火与「断粮」。'},
-  {tier:'T0',name:'南蛮·双借刀',core:'祝融夫人 + 诸葛亮 + 孟获',
-   note:'雁形阵，祝融夫人后排输出核心；诸葛亮(折冲御侮+调和阴阳)+孟获(指点乾坤+践墨随敌)双借刀体系，全赛季通用。'},
-  {tier:'T0',name:'诸葛姜维',core:'诸葛亮 + 姜维 + 辅助/坦',
-   note:'姜维「九伐中原」文武伤害+「胜敌益强」联动快速叠智武；诸葛亮带「惩前毖后」稳定触发姜维被动，伤害要高。'},
-  {tier:'T0',name:'王异·谋略追击',core:'王异 + 辅助/坦 + 治疗位',
-   note:'王异(魏·枪)自带「巧策引锋」谋略追击核心，配防御/治疗位站桩输出；S7起被「断戈夺锋」针对需注意。'},
-  {tier:'T0',name:'左慈张宁',core:'左慈 + 张宁 + 蔡文姬(最稳)/张角',
-   note:'左慈「云行雨施」全队主动战法发动率+保护，张宁「太平余响」谋略爆发；带蔡文姬最稳(抵御防爆发)，也可换田丰/步练师/张昭。'},
-  {tier:'T0',name:'陆逊·火攻',core:'陆逊 + 孙权/左慈/鲁肃/小乔/黄盖',
+  // ===== 你确认的 S17 当期强势体系（T0）=====
+  {group:'S17当期强势',tier:'T0',name:'大汉盾体系',core:'皇甫嵩 + 朱儁 + 前排队友',
+   note:'皇甫嵩靠「百战不殆」狂叠统率(中后期全队统率600+)，坦度拉满、自带战法爆发；朱儁触发「汉末栋梁」羁绊减伤。克兵刃体系，怕陆逊火与「断粮」。'},
+  {group:'S17当期强势',tier:'T0',name:'南蛮·双借刀',core:'祝融夫人 + 诸葛亮 + 孟获',
+   note:'雁形阵，祝融夫人后排输出核心；诸葛亮(草船借箭)+孟获双借刀体系，全赛季通用。'},
+  {group:'S17当期强势',tier:'T0',name:'诸葛姜维',core:'诸葛亮 + 姜维 + 辅助/坦',
+   note:'姜维「九伐中原」文武伤害+「胜敌益强」联动快速叠智武；诸葛亮稳定触发姜维被动，伤害要高。'},
+  {group:'S17当期强势',tier:'T0',name:'王异·谋略追击',core:'王异 + 辅助/坦 + 治疗位',
+   note:'王异(魏·枪)自带「巧策引锋」谋略追击核心，配防御/治疗位站桩输出；注意被断戈夺锋针对。'},
+  {group:'S17当期强势',tier:'T0',name:'左慈张宁',core:'左慈 + 张宁 + 蔡文姬',
+   note:'左慈「云行雨施」全队主动战法发动率+保护，张宁「太平余响」谋略爆发；带蔡文姬最稳，也可换田丰/步练师/张昭。'},
+  {group:'S17当期强势',tier:'T0',name:'陆逊·火攻',core:'陆逊 + 孙权 + 鲁肃',
    note:'陆逊「火烧连营」谋略火伤压制，演武强势；怕被断粮/高速压制。可配左慈提发动率、孙权/鲁肃续航。'},
+  // ===== 经典主流强队（17173 攻略，各服赛季编号不同，供参考）=====
+  {group:'经典主流强队',tier:'T0',name:'泰袁马·速攻',core:'马超 + 袁绍 + 周泰',
+   note:'马超兵刃爆发+袁绍「合聚群雄」增伤+周泰「不屈意志」扛前排，速攻猛、压制力强。（17173 八大强队）'},
+  {group:'经典主流强队',tier:'T0',name:'赵甘貂·真神',core:'赵云 + 甘夫人 + 貂蝉',
+   note:'赵云七进七出+甘夫人辅助+貂蝉闭月坦克，打击面广、爆发高，锥形阵强势。'},
+  {group:'经典主流强队',tier:'T0',name:'曹荀懿·谋略',core:'曹操 + 荀彧 + 司马懿',
+   note:'司马懿「鹰视狼顾」谋略爆发+曹操乱世奸雄+荀彧建计举人，谋略队核心。'},
+  {group:'经典主流强队',tier:'T0',name:'双皇陆·火攻',core:'曹操 + 陆逊 + 孙权',
+   note:'陆逊火烧连营+曹操/孙权双辅助续航提频，谋略火队，演武强势。'},
+  {group:'经典主流强队',tier:'T0',name:'先登吕布·骑攻',core:'吕布 + 陈宫 + 乐进',
+   note:'吕布「骁勇无前」+陈宫智令从计，骑快攻先手压制；乐进每战先登补先手。'},
+  {group:'经典主流强队',tier:'T0',name:'三仙队·法术',core:'左慈 + 于吉 + 张角',
+   note:'左慈云行雨施提发动率+于吉风急雨晦+张角黄天当立，法术爆发体系。'},
 ];
 
 /* =========================================================
@@ -764,12 +1001,20 @@ function renderResult(){
    九、资料库渲染
    ========================================================= */
 function renderRef(){
-  document.getElementById('refgrid').innerHTML=SYSTEMS.map(s=>`
+  let lastG=null,parts=[];
+  SYSTEMS.forEach(s=>{
+    if(s.group&&s.group!==lastG){
+      parts.push(`<div class="refgroup" style="grid-column:1/-1;font-size:13px;font-weight:800;color:#e6b34a;margin:${lastG?'16px':'4px'} 0 2px;padding-left:9px;border-left:3px solid #e6b34a">${esc(s.group)}${s.group==='S17当期强势'?'（你确认的当前 meta）':'（17173 攻略，赛季标签各异，供参考）'}</div>`);
+      lastG=s.group;
+    }
+    parts.push(`
     <div class="refcard">
       <div class="rt"><span class="tier">${s.tier}</span>${esc(s.name)}</div>
       <div class="rm"><b>核心：</b>${esc(s.core)}<br>${esc(s.note)}</div>
       <div class="load" onclick='loadSystem(${JSON.stringify(s.core)})'>➕ 载入到卡池 →</div>
-    </div>`).join('');
+    </div>`);
+  });
+  document.getElementById('refgrid').innerHTML=parts.join('');
   document.getElementById('legend').innerHTML=`
     <b>📖 战法类型与克制</b><br>
     · <span class="k">指挥</span>：最先发动、不怕控制（被震慑也能放），但武将阵亡后失效。<br>
@@ -788,12 +1033,90 @@ function loadSystem(coreStr){
 }
 
 /* =========================================================
+   九·五、淘汰赛 · 田忌赛马对位
+   ========================================================= */
+const PERM3=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+let koState={my:[null,null,null],opp:[null,null,null]};
+
+function renderKnockout(){
+  const el=document.getElementById('koBody');
+  let teamsInfo='';
+  if(state.result&&state.result.teams&&state.result.teams.length){
+    const sc=state.result.teams.map(t=>+evalTeam(t).score.toFixed(1));
+    koState.my=sc.slice();
+    teamsInfo=`<div class="note" style="margin:6px 0 2px;color:#9fb0cc">已从「三队方案」带入：`+
+      state.result.teams.map((t,i)=>`${['一','二','三'][i]}队 <b style="color:#e6b34a">${sc[i].toFixed(1)}</b>（${t.map(g=>esc(g.name)||'?').join('/')}）`).join('；')+`</div>`;
+  }
+  const my=koState.my, opp=koState.opp;
+  el.innerHTML=`
+    ${teamsInfo}
+    <div class="sh" style="margin-top:10px"><span class="bar"></span>① 我方三队战力</div>
+    <div class="flevrow" style="gap:10px">
+      ${[0,1,2].map(i=>`<div style="flex:1;min-width:110px"><div style="font-size:11px;color:var(--sub);margin-bottom:4px">我的${['一','二','三'][i]}队</div><input type="number" step="0.1" value="${my[i]!=null?my[i]:''}" oninput="koSet('my',${i},this.value)" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:9px;font-size:14px;font-weight:700"></div>`).join('')}
+    </div>
+    <div class="sh" style="margin-top:16px"><span class="bar"></span>② 对手三队战力 <span style="font-size:11px;color:var(--sub);font-weight:500">（按对手出场序号，未知可留空）</span></div>
+    <div class="flevrow" style="gap:10px">
+      ${[0,1,2].map(i=>`<div style="flex:1;min-width:110px"><div style="font-size:11px;color:var(--sub);margin-bottom:4px">对手队${i+1}</div><input type="number" step="0.1" placeholder="未知留空" value="${opp[i]!=null?opp[i]:''}" oninput="koSet('opp',${i},this.value)" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:9px;font-size:14px;font-weight:700"></div>`).join('')}
+    </div>
+    <div class="genbar" style="margin-top:14px">
+      <button class="btn primary" onclick="computeKO()">🎯 计算最优对位</button>
+      <span class="spacer"></span>
+      <button class="btn ghost" onclick="koState={my:[null,null,null],opp:[null,null,null]};renderKnockout()">重置</button>
+    </div>
+    <div id="koResult"></div>`;
+}
+function koSet(k,i,v){koState[k][i]=v===''?null:(+v);}
+
+function computeKO(){
+  const my=koState.my.map(x=>x===null||x===''?null:+x);
+  const opp=koState.opp.map(x=>x===null||x===''?null:+x);
+  if(my.some(x=>x===null)){alert('请先填满我方三队战力（或先去「🏆 三队方案」生成，自动带入）');return;}
+  const known=opp.filter(x=>x!==null);
+  const oppFill=opp.map(x=>x!==null?x:(known.length?known.reduce((a,b)=>a+b,0)/known.length:my.reduce((a,b)=>a+b,0)/3));
+  const pOf=(a,b)=>logistic((a-b)/K_SCALE);
+  // 我方排序按强弱命名（上/中/下等马），但对位用真实队号
+  const sortedIdx=[0,1,2].sort((a,b)=>my[b]-my[a]);
+  const horseName={};horseName[sortedIdx[0]]='上等马';horseName[sortedIdx[1]]='中等马';horseName[sortedIdx[2]]='下等马';
+  let best=null;
+  PERM3.forEach(pm=>{
+    const ps=[0,1,2].map(s=>pOf(my[pm[s]],oppFill[s]));
+    const [a,b,c]=ps;
+    const p2=(a*b*c)+(a*b*(1-c))+(a*(1-b)*c)+((1-a)*b*c);
+    const minp=Math.min(...ps);
+    if(!best||p2>best.p2+1e-9||(Math.abs(p2-best.p2)<1e-9&&minp>best.minp)){best={pm,ps,p2,minp};}
+  });
+  const rows=[0,1,2].map(s=>{
+    const mi=best.pm[s];const win=best.ps[s]>=0.5;const oppKnown=opp[s]!==null;
+    return `<div class="erow" style="grid-template-columns:1fr auto 1fr;margin-bottom:8px;align-items:center">
+      <div style="font-weight:800;color:#e6b34a">我的${['一','二','三'][mi]}队<span style="font-size:10px;color:var(--sub)"> ${horseName[mi]}·${my[mi].toFixed(1)}</span></div>
+      <div style="text-align:center;color:var(--sub);font-size:12px">vs 对手队${s+1}${oppKnown?'':'<span style=\"color:#6a7690\">(估)</span>'}</div>
+      <div style="text-align:right;font-weight:800;color:${win?'#3fbf9a':'#e0524f'}">胜率${Math.round(best.ps[s]*100)}% ${win?'✅':'⚠️'}</div>
+    </div>`;
+  }).join('');
+  const winsN=best.ps.filter(p=>p>=0.5).length;
+  const sacrifice=best.ps.findIndex(p=>p<0.5);
+  const sacrificeNote=sacrifice>=0?`此排法主动「弃」掉 <b>我的${['一','二','三'][best.pm[sacrifice]]}队（${horseName[best.pm[sacrifice]]}）</b> 去撞对手强队，用另外两队吃分——正是田忌赛马的弃一保二。`:'三局都占优，直接压过去即可。';
+  document.getElementById('koResult').innerHTML=`
+    <div class="sum" style="margin-top:16px">
+      <h3>📊 最优对位方案（田忌赛马）</h3>
+      <div style="margin:12px 0">${rows}</div>
+      <div class="statrow">
+        <div class="stat"><div class="sv" style="color:${best.p2>=0.5?'#3fbf9a':'#e6b34a'}">${Math.round(best.p2*100)}%</div><div class="sl">赢下淘汰赛(≥2局)概率</div></div>
+        <div class="stat"><div class="sv">${winsN}<span style="font-size:12px;color:var(--sub)">/3</span></div><div class="sl">预计可拿下局数</div></div>
+      </div>
+      <div class="note">${sacrificeNote} ${winsN>=2?'<span style="color:#3fbf9a">→ 概率上能 2:1 拿下！</span>':'<span style="color:#e0524f">→ 双方太接近，仍需看临场克制发挥。</span>'}</div>
+      <div class="note" style="margin-top:6px;color:#8794ac;font-size:11.5px">※ 未知对手按均值估计；胜率基于战力差建模，仅供相对参考，实战还受兵种克制/战法发挥影响。若能看清对手阵容，优先让己方队伍去克制对手。</div>
+    </div>`;
+}
+
+/* =========================================================
    十、Tab / 启动
    ========================================================= */
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));
   document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
   document.getElementById('pane-'+t).classList.add('on');
+  if(t==='ko')renderKnockout();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.tab));
